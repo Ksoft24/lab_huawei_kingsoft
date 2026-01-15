@@ -4,8 +4,8 @@ import mysql.connector
 import paho.mqtt.client as mqtt
 
 # ================= MQTT CONFIG =================
-MQTT_BROKER = "124.81.100.201"
-MQTT_PORT = 1884
+MQTT_BROKER = "161.132.56.91"
+MQTT_PORT = 1883
 MQTT_TOPIC = "lab/sensors/#"
 
 MQTT_USERNAME = "adminmqtt"
@@ -14,9 +14,9 @@ MQTT_PASSWORD = "calero2020"
 # ================= MYSQL CONFIG =================
 DB_CONFIG = {
     "host": "localhost",
-    "user": "iotuser",
-    "password": "iotpass",
-    "database": "iot",
+    "user": "root",
+    "password": "rootleon",
+    "database": "db_iot_safety",
     "port": 3306
 }
 
@@ -84,7 +84,7 @@ def save_to_db(r):
             co_ppm, co_status,
             accel_x, accel_y, accel_z, accel_status
         )
-        VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
+        VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
     """
 
     values = (
@@ -103,13 +103,13 @@ def save_to_db(r):
     conn.close()
 
 # ================= MQTT CALLBACKS =================
-def on_connect(client, userdata, flags, rc):
-    if rc == 0:
+
+def on_connect(client, userdata, flags, reasonCode, properties=None):
+    if reasonCode == 0:
         print("✅ Connected to MQTT broker")
         client.subscribe(MQTT_TOPIC, qos=1)
     else:
-        print("❌ MQTT connection failed, code:", rc)
-
+        print("❌ MQTT connection failed, code:", reasonCode)
 
 def on_message(client, userdata, msg):
     payload = json.loads(msg.payload.decode())
@@ -143,7 +143,10 @@ def on_message(client, userdata, msg):
     print("💾 Saved:", record)
 
 # ================= MQTT CLIENT =================
-client = mqtt.Client()
+client = mqtt.Client(
+    mqtt.CallbackAPIVersion.VERSION2,
+    protocol=mqtt.MQTTv311
+)
 client.username_pw_set(MQTT_USERNAME, MQTT_PASSWORD)
 
 client.on_connect = on_connect

@@ -6,9 +6,9 @@ app = Flask(__name__)
 # ================== DB CONFIG ==================
 DB_CONFIG = {
     "host": "localhost",
-    "user": "iotuser",
-    "password": "iotpass",
-    "database": "iot",
+    "user": "root",
+    "password": "rootleon",
+    "database": "db_iot_safety",
     "cursorclass": pymysql.cursors.DictCursor
 }
 
@@ -32,7 +32,7 @@ def get_all_readings():
         SELECT
             id,
             device_id,
-
+       
             temperature,
             temperature_status,
 
@@ -53,9 +53,9 @@ def get_all_readings():
             accel_z,
             accel_status,
 
-            created_at
+            timestamp 
         FROM sensor_readings
-        ORDER BY created_at DESC
+        ORDER BY timestamp  DESC
         LIMIT %s
     """, (int(limit),))
 
@@ -77,7 +77,7 @@ def get_latest_reading():
     cursor.execute("""
         SELECT *
         FROM sensor_readings
-        ORDER BY created_at DESC
+        ORDER BY timestamp  DESC
         LIMIT 1
     """)
 
@@ -100,7 +100,7 @@ def get_by_device(device_id):
         SELECT *
         FROM sensor_readings
         WHERE device_id = %s
-        ORDER BY created_at DESC
+        ORDER BY timestamp  DESC
     """, (device_id,))
 
     rows = cursor.fetchall()

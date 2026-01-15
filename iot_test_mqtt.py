@@ -4,8 +4,8 @@ import random
 import paho.mqtt.client as mqtt
 
 # ================ MQTT CONFIG =================
-BROKER_IP = "124.81.100.201"
-BROKER_PORT = 1884
+BROKER_IP = "161.132.56.91"
+BROKER_PORT = 1883
 TOPIC = "lab/sensors/device01"
 
 USERNAME = "adminmqtt"
