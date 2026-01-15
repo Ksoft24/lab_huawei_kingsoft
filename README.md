@@ -12,11 +12,28 @@ repositorio según los subtítulos del laboratorio.
 
 ## **1.1 --- Gráfico del circuito**
 
-Incluye un esquema de conexión de dispositivos (por ejemplo,
-**Arduino**) para simular sensores o dispositivos que envían datos al
-broker MQTT.
+Incluye un esquema de conexión de dispositivos con microcontralador y tarjeta Wifi con los sensores necesarios para el laboratorio.
 
-📌 **Revisa las imágenes o diagramas en la carpeta `arduino`.**
+Materiales
+
+✅ Arduino R4 WiFi
+Para lectura de sensores y envío de datos vía serial o MQTT.
+
+✅ ESP32-CAM
+Captura y envío de imágenes para inferencia de IA.
+
+✅ Raspberry Pi 4 
+Nodo de procesamiento y pruebas con OpenEuler.
+
+🌡️ DHT11 / DHT22 - Sensor de temperatura y humedad.
+
+💡 BH1750 - Sensor de luminosidad (lux).
+
+🧭 MPU6050 - Acelerómetro y giroscopio (movimiento y orientación).
+
+🛢️ MQ-7 - Sensor de Monoxido de Carbono
+
+Camara web USB
 
 ------------------------------------------------------------------------
 
@@ -31,7 +48,7 @@ broker MQTT (URL y credenciales).**
 
 ------------------------------------------------------------------------
 
-## **1.3 --- (Teoría) Crear un ECS en Huawei Cloud**
+## **1.3 --- Crear un ECS en Huawei Cloud**
 
 Un **ECS (Elastic Cloud Server)** es una instancia de máquina virtual
 dentro de Huawei Cloud donde puedes desplegar servicios (por ejemplo,
@@ -45,7 +62,7 @@ MQTT Broker, API, bases de datos).
 
 ------------------------------------------------------------------------
 
-## **1.4 --- (Teoría) Instalación y configuración MQTT en OpenEuler**
+## **1.4 ---  Instalación y configuración MQTT en OpenEuler**
 
 MQTT es un **protocolo ligero de mensajería para IoT**.
 
@@ -80,7 +97,7 @@ configurado.**
 
 ------------------------------------------------------------------------
 
-## **1.7 --- (Teoría) Instalación y configuración MySQL en OpenEuler**
+## **1.7 ---  Instalación y configuración MySQL en OpenEuler**
 
 MySQL es un **motor de base de datos relacional** que almacenará los
 eventos/datos recolectados desde MQTT.
@@ -100,10 +117,6 @@ Crea base y tablas para almacenar los datos de IoT.
 📄 **Archivo:** `1.7_bd.sql`
 
 Contiene el esquema de la base de datos (tablas y campos).
-
-Ejemplo:
-
-    CREATE TABLE messages (...);
 
 Importa con:
 
@@ -127,7 +140,7 @@ Este puente permite la persistencia de datos IoT.
 
 📄 **Archivo:** `1.9_iot_api_data.py`
 
-Construcción de una API (por ejemplo con Flask) para exponer datos.
+Construcción de una API ( con Flask) para exponer datos.
 
 Ejemplos: - `/messages` → devuelve datos IoT\
 - `/status` → estado del servidor
@@ -142,7 +155,7 @@ Script que consume la API y valida su funcionamiento.
 
 ------------------------------------------------------------------------
 
-## **1.11 --- (Teoría) Conexión a Power BI**
+## **1.11 --- Conexión a Power BI**
 
 Para visualizar datos: - Power BI Desktop → **Obtener datos \>
 Web/API**\
@@ -233,3 +246,8 @@ alineados a los lineamientos y objetivos de la **Huawei Teaching
 Competition**, con fines de formación, demostración tecnológica y
 fortalecimiento de competencias en **IoT, Cloud e Inteligencia
 Artificial**.
+
+
+Arduino es una marca registrada de Arduino AG. 
+Este proyecto utiliza placas y herramientas compatibles con Arduino únicamente con fines educativos y demostrativos. 
+El uso del nombre Arduino en este repositorio es solo referencial y no implica afiliación, patrocinio ni aprobación oficial por parte de Arduino.

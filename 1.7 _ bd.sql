@@ -25,10 +25,3 @@ CREATE TABLE sensor_readings (
 );
 
 
-
-🌐 Endpoints listos para Power BI
-Endpoint	Uso
-/api/readings	Todas las lecturas
-/api/readings?limit=500	Últimos 500
-/api/readings/latest	Última lectura
-/api/readings/device/opta01	Por dispositivo
