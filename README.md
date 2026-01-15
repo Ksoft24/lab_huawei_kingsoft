@@ -10,6 +10,14 @@ repositorio según los subtítulos del laboratorio.
 
 # 🧠 1 --- IOT-CLOUD
 
+El objetivo de esta sección es implementar un **ecosistema IoT completo**, donde los dispositivos físicos (sensores y microcontroladores) capturan datos, los transmiten mediante el protocolo **MQTT**, se almacenan en una base de datos en la nube y finalmente se exponen mediante una **API para su visualización y análisis**.
+
+Se desarrolla el flujo completo de datos:
+
+**dispositivo → broker MQTT → procesamiento → base de datos → API → visualización**
+
+Este laboratorio permite comprender la integración entre **hardware, redes, sistemas operativos en la nube (OpenEuler), bases de datos, servicios web y herramientas de analítica**, simulando un escenario real de arquitectura IoT empresarial.
+
 ## **1.1 --- Gráfico del circuito**
 
 Incluye un esquema de conexión de dispositivos con microcontralador y tarjeta Wifi con los sensores necesarios para el laboratorio.
@@ -171,7 +179,10 @@ Web/API**\
 
 # 🧠 2 --- IA-CLOUD
 
-El objetivo es usar IA para inferencia de imágenes y exponerlo como API.
+El objetivo de esta sección es aplicar **Inteligencia Artificial para análisis de imágenes**, desplegar modelos como servicios en la nube y permitir que distintos dispositivos (PC, Raspberry y ESP32-CAM) consuman estos servicios mediante APIs.
+
+Se trabaja el flujo completo:  
+**captura de imagen → inferencia → exposición por API → consumo desde dispositivos**.
 
 ------------------------------------------------------------------------
 
@@ -179,11 +190,17 @@ El objetivo es usar IA para inferencia de imágenes y exponerlo como API.
 
 📄 **Archivo:** `2.1_inferencia_local.py`
 
+Este módulo permite realizar **inferencia local de imágenes** utilizando una librería de visión e interpretación de contexto (por ejemplo, CLIP).  
+Se emplea para validar el modelo, comprender su funcionamiento y evaluar resultados antes de desplegarlo como servicio.
+
 ------------------------------------------------------------------------
 
 ## **2.2 --- Crear API Flask Python**
 
 📄 **Archivo:** `2.2_api_inferencia.py`
+
+En este archivo se construye una **API REST con Flask** que expone el modelo de inferencia.  
+La API recibe imágenes desde clientes externos y retorna los resultados del análisis, permitiendo desacoplar el modelo del dispositivo que captura la imagen.
 
 ------------------------------------------------------------------------
 
@@ -191,11 +208,15 @@ El objetivo es usar IA para inferencia de imágenes y exponerlo como API.
 
 📄 **Archivo:** `2.3_test_api_inferencia.py`
 
+Este script permite **validar el funcionamiento de la API**, enviando una imagen de prueba y verificando la respuesta del modelo.  
+Es fundamental para comprobar conectividad, formato de datos y estabilidad del servicio.
+
 ------------------------------------------------------------------------
 
 ## **2.4 --- Código ESP32-CAM**
 
-Captura imágenes y las envía a la API.
+Este módulo integra un **ESP32-CAM** para capturar imágenes y enviarlas directamente a la API de inferencia.  
+Permite evaluar escenarios de **edge computing e IoT visual**, donde un dispositivo embebido interactúa con servicios de IA en la nube.
 
 ------------------------------------------------------------------------
 
@@ -203,17 +224,27 @@ Captura imágenes y las envía a la API.
 
 📄 **Archivo:** `2.5_inferencia_cam_local.py`
 
+Este código captura imágenes desde una **cámara conectada a un PC con OpenEuler** y las envía a la API para su análisis.  
+Se utiliza para pruebas de escritorio, validación de rendimiento y depuración del sistema.
+
 ------------------------------------------------------------------------
 
 ## **2.6 --- Raspberry con OpenEuler**
 
 📄 **Archivo:** `2.6_inferencia_raspberry.py`
 
+Versión adaptada para ejecutarse en una **Raspberry Pi con OpenEuler**, permitiendo realizar inferencias remotas desde un dispositivo de bajo consumo.  
+Simula escenarios reales de despliegue en campo.
+
 ------------------------------------------------------------------------
 
 ## **2.7 --- Inferencia local en Raspberry**
 
 *(Pendiente de implementación)*
+
+Este módulo permitirá ejecutar el modelo de **Inteligencia Artificial directamente en la Raspberry**, sin depender de una API externa.  
+Este enfoque reduce latencia, dependencia de red y mejora la autonomía del sistema.
+
 
 ------------------------------------------------------------------------
 
