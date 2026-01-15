@@ -14,6 +14,8 @@ repositorio según los subtítulos del laboratorio.
 
 Incluye un esquema de conexión de dispositivos con microcontralador y tarjeta Wifi con los sensores necesarios para el laboratorio.
 
+![Diagrama del circuito](1.1 _ Board_bb.png)
+
 Materiales
 
 ✅ Arduino R4 WiFi
