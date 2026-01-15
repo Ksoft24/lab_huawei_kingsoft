@@ -24,7 +24,7 @@ Incluye un esquema de conexión de dispositivos con microcontralador y tarjeta W
 
 
 <p align="center">
-  <img src="1.1 _ Board_bb.png" width="500">
+  <img src="1.1 img_board_bb.png" width="500">
 </p>
 
 Materiales
@@ -218,6 +218,10 @@ Es fundamental para comprobar conectividad, formato de datos y estabilidad del s
 Este módulo integra un **ESP32-CAM** para capturar imágenes y enviarlas directamente a la API de inferencia.  
 Permite evaluar escenarios de **edge computing e IoT visual**, donde un dispositivo embebido interactúa con servicios de IA en la nube.
 
+<p align="center">
+  <img src="1.1 img_esp32-cam.png" width="500">
+</p>
+
 ------------------------------------------------------------------------
 
 ## **2.5 --- PC con OpenEuler**
@@ -235,6 +239,10 @@ Se utiliza para pruebas de escritorio, validación de rendimiento y depuración 
 
 Versión adaptada para ejecutarse en una **Raspberry Pi con OpenEuler**, permitiendo realizar inferencias remotas desde un dispositivo de bajo consumo.  
 Simula escenarios reales de despliegue en campo.
+
+<p align="center">
+  <img src="1.1 img_raspberry pi4.png" width="500">
+</p>
 
 ------------------------------------------------------------------------
 
