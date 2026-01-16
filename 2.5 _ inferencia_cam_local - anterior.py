@@ -10,49 +10,19 @@ import tty
 from PIL import Image, ImageDraw, ImageFont
 import cv2
 import numpy as np
-import subprocess
-import platform
-
 
 # -----------------------------
-# Detección de entorno
-# -----------------------------
-def is_raspberry():
-    try:
-        with open("/proc/device-tree/model") as f:
-            return "raspberry" in f.read().lower()
-    except:
-        return False
-
-HAS_GUI = bool(os.environ.get("DISPLAY"))
-IS_RASPBERRY = is_raspberry()
-
-print("🖥 GUI disponible:", HAS_GUI)
-print("🍓 Raspberry detectado:", IS_RASPBERRY)
-
-# -----------------------------
-# Configuración CLIP
+# Configuración
 # -----------------------------
 device = "cuda" if torch.cuda.is_available() else "cpu"
 model, preprocess = clip.load("ViT-B/32", device=device)
 model.eval()
 
-# -----------------------------
-# Carpeta de imágenes
-# -----------------------------
-BASE_DIR = os.path.expanduser("~/laboratorio_kingsoft")
+BASE_DIR = "/home/calero/HUAWEI_ICT_TEACHING_2026/IMG"
 os.makedirs(BASE_DIR, exist_ok=True)
 
-print("📁 Imágenes se guardarán en:", BASE_DIR)
+CAMERA_ID = 0
 
-# -----------------------------
-# Cámara
-# -----------------------------
-CAMERA_ID = 0   # cambia si es necesario
-
-# -----------------------------
-# Clases PPE
-# -----------------------------
 ppe_items = {
     "helmet": (
         "construction worker wearing a safety helmet",
@@ -88,12 +58,12 @@ def capture_frame():
     if not ret:
         print("❌ Error capturando frame")
         return None
-
+    # Convertir a PIL
     img = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
     return Image.fromarray(img)
 
 def infer_clip(image):
-    """Inferencia local CLIP"""
+    """Inferencia local CLIP sobre PIL Image"""
     image_resized = image.resize((1024, 640))
     image_input = preprocess(image_resized).unsqueeze(0).to(device)
 
@@ -115,7 +85,7 @@ def infer_clip(image):
             results[item] = round(confidence, 2)
 
     end_time = time.time()
-    return results, round(end_time - start_time, 3)
+    return results, round(end_time - start_time, 4)
 
 def draw_results(image, results):
     draw = ImageDraw.Draw(image)
@@ -152,54 +122,12 @@ def save_image(image):
     image.save(save_path)
     return save_path
 
-def show_image(path):
-    """
-    Decide automáticamente cómo mostrar la imagen
-    """
-    # Caso 1: hay entorno gráfico
-    if HAS_GUI and not IS_RASPBERRY:
-        print("🖥 Mostrando imagen con ventana gráfica")
-        img = cv2.imread(path)
-        cv2.imshow("Inferencia CLIP", img)
-        cv2.waitKey(2000)
-        cv2.destroyAllWindows()
-
-    # Caso 2: Raspberry / sin GUI → ASCII en Python
-    else:
-        print("📟 Mostrando imagen en modo ASCII (Python)")
-        try:
-            show_ascii_image(path, width=80)
-        except Exception as e:
-            print("⚠️ Error mostrando ASCII:", e)
-
-
-# -----------------------------
-# Visualización ASCII (sin dependencias externas)
-# -----------------------------
-def show_ascii_image(image_path, width=80):
-    chars = np.asarray(list(" .:-=+*#%@"))
-
-    img = Image.open(image_path).convert("L")  # escala de grises
-    w, h = img.size
-    aspect_ratio = h / w
-    new_height = int(aspect_ratio * width * 0.55)
-
-    img = img.resize((width, new_height))
-    img_array = np.array(img)
-
-    img_norm = (img_array / 255.0) * (len(chars) - 1)
-    img_chars = chars[img_norm.astype(int)]
-
-    print("\n")
-    for row in img_chars:
-        print("".join(row))
-
 # -----------------------------
 # Loop principal
 # -----------------------------
 def main():
-    print("\n🎥 Programa de inferencia CLIP iniciado")
-    print("H = Inferir | Q = Salir\n")
+    print("🎥 Programa de inferencia CLIP local iniciado")
+    print("H=inferir | Q=salir")
 
     while True:
         key = get_key()
@@ -209,18 +137,20 @@ def main():
             if frame is None:
                 continue
 
-            print("\n🧠 Inferencia en curso...")
+            print("🧠 Inferencia local en curso...")
             results, t_inf = infer_clip(frame)
-
-            print(f"⏱ Tiempo: {t_inf}s")
+            print(f"✅ Resultados (tiempo: {t_inf}s):")
             for k, v in results.items():
                 print(f"  {k.upper()}: {v:.1f}%")
 
             frame_marked = draw_results(frame.copy(), results)
             path = save_image(frame_marked)
-            print(f"🖼 Imagen guardada en: {path}")
+            print(f"🖼 Imagen marcada guardada en: {path}")
 
-            show_image(path)
+            # Mostrar imagen con OpenCV
+            cv2.imshow(f"Inferencia CLIP | Tiempo: {t_inf}s", cv2.cvtColor(np.array(frame_marked), cv2.COLOR_RGB2BGR))
+            cv2.waitKey(0)  # espera hasta que presiones cualquier tecla
+            cv2.destroyAllWindows()
 
         elif key == "q":
             print("🔚 Saliendo del programa...")
