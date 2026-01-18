@@ -4,7 +4,7 @@ import mysql.connector
 import paho.mqtt.client as mqtt
 
 # ================= MQTT CONFIG =================
-MQTT_BROKER = "161.132.56.91"
+MQTT_BROKER = "20.40.210.148"
 MQTT_PORT = 1883
 MQTT_TOPIC = "lab/sensors/#"
 
@@ -14,9 +14,9 @@ MQTT_PASSWORD = "calero2020"
 # ================= MYSQL CONFIG =================
 DB_CONFIG = {
     "host": "localhost",
-    "user": "root",
-    "password": "rootleon",
-    "database": "db_iot_safety",
+    "user": "kingsoft",
+    "password": "Open@2026",
+    "database": "db_iot_kingsoft",
     "port": 3306
 }
 

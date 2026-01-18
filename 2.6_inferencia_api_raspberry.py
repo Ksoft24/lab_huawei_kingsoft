@@ -13,7 +13,7 @@ from io import BytesIO
 # -----------------------------
 # Configuración
 # -----------------------------
-API_URL = "http://127.0.0.1:5000/infer"
+API_URL = "http://20.40.210.148:5000/infer"
 CAMERA_ID = 0
 BASE_DIR = "/home/calero/HUAWEI_ICT_TEACHING_2026/IMG"
 

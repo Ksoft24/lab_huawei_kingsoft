@@ -10,7 +10,7 @@ import os
 # -----------------------------
 # Configuración
 # -----------------------------
-API_URL = "http://127.0.0.1:5000/infer"
+API_URL = "http://20.40.210.148:5000/infer"
 
 # === ELIGE UNA ===
 url_o_ruta = "/home/calero/Descargas/istockphoto-1481370371-1024x1024.jpg"

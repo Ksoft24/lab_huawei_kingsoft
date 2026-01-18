@@ -6,9 +6,9 @@ app = Flask(__name__)
 # ================== DB CONFIG ==================
 DB_CONFIG = {
     "host": "localhost",
-    "user": "root",
-    "password": "rootleon",
-    "database": "db_iot_safety",
+    "user": "kingsoft",
+    "password": "Open@2026",
+    "database": "db_iot_kingsoft",
     "cursorclass": pymysql.cursors.DictCursor
 }
 

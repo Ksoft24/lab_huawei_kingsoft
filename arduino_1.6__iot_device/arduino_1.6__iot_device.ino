@@ -12,7 +12,7 @@ const char* WIFI_SSID = "CALERO";
 const char* WIFI_PASS = "wendy12345";
 
 // ================= MQTT =================
-const char* MQTT_BROKER   = "161.132.56.91";
+const char* MQTT_BROKER   = "20.40.210.148";
 const int   MQTT_PORT     = 1883;
 const char* MQTT_USER     = "adminmqtt";
 const char* MQTT_PASSWORD = "calero2020";

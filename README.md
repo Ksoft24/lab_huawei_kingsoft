@@ -52,12 +52,9 @@ Camara web USB
 
 ## **1.2 --- Código Arduino**
 
-Este código se usa para enviar datos desde un Arduino al servidor/cloud
-usando MQTT.\
+Este código se usa para probar la obtencion de datos desde un Microcontrolador.\
 Ejemplo de uso dentro de: **`arduino/`**
 
-📌 **Debes cargar el sketch en tu placa compatible y configurar el
-broker MQTT (URL y credenciales).**
 
 ------------------------------------------------------------------------
 
@@ -105,8 +102,8 @@ y/o consume mensajes.
 Versión más completa del sketch Arduino que se conecta al broker MQTT
 con credenciales y publica datos periódicamente.
 
-📌 **Ajusta las variables como URL y topics según tu broker
-configurado.**
+📌 **Debes cargar el sketch en tu placa compatible y configurar el
+broker MQTT (URL y credenciales).**
 
 ------------------------------------------------------------------------
 
