@@ -35,7 +35,7 @@ Para lectura de sensores y envío de datos vía serial o MQTT.
 ✅ ESP32-CAM
 Captura y envío de imágenes para inferencia de IA.
 
-✅ Raspberry Pi 4 
+✅ Raspberry Pi 4 B
 Nodo de procesamiento y pruebas con OpenEuler.
 
 🌡️ DHT11 / DHT22 - Sensor de temperatura y humedad.
@@ -48,12 +48,16 @@ Nodo de procesamiento y pruebas con OpenEuler.
 
 Camara web USB
 
+Realizar la Integracion del Arduino conforme el Diagrama
+Realizar la Integracion de la ESP32-CAM, conforme al diagram
+Colocar la Camara Web al puerto usb de Raspberry pi 4B
 ------------------------------------------------------------------------
 
 ## **1.2 --- Código Arduino**
 
 Este código se usa para probar la obtencion de datos desde un Microcontrolador.\
-Ejemplo de uso dentro de: **`arduino/`**
+
+📄 **Archivo:** `arduino_1.2_serial_device.ino`
 
 
 ------------------------------------------------------------------------
@@ -76,12 +80,16 @@ MQTT Broker, API, bases de datos).
 
 MQTT es un **protocolo ligero de mensajería para IoT**.
 
-En tu ECS con OpenEuler, instala un broker (por ejemplo, Mosquitto):
+En nuestro servidor con OpenEuler, instalaremos el broker Mosquitto:
 
     sudo dnf install mosquitto
     sudo systemctl enable --now mosquitto
 
 Configura el archivo **mosquitto.conf** para permitir conexiones.
+
+Asi mismo revisa la guia detallada de instalacion en el documento
+
+📄 **Archivo:** `1.4_OpenEuler_MQTT.docx`
 
 📌 **El broker escuchará conexiones MQTT a las que tus dispositivos se
 suscribirán/publicarán.**
@@ -102,14 +110,16 @@ y/o consume mensajes.
 Versión más completa del sketch Arduino que se conecta al broker MQTT
 con credenciales y publica datos periódicamente.
 
+📄 **Archivo:** `arduino_1.6_iot_device.ino`
+
 📌 **Debes cargar el sketch en tu placa compatible y configurar el
 broker MQTT (URL y credenciales).**
 
 ------------------------------------------------------------------------
 
-## **1.7 ---  Instalación y configuración MySQL en OpenEuler**
+## **1.7 ---  Instalación y configuración Mariadb en OpenEuler**
 
-MySQL es un **motor de base de datos relacional** que almacenará los
+Mariadb es un **motor de base de datos relacional** que almacenará los
 eventos/datos recolectados desde MQTT.
 
 En tu ECS con OpenEuler:
@@ -120,6 +130,10 @@ En tu ECS con OpenEuler:
 Asegura tu instalación (**mysql_secure_installation**).\
 Crea base y tablas para almacenar los datos de IoT.
 
+Asi mismo revisa la guia detallada de instalacion en el documento
+
+📄 **Archivo:** `1.7_OpenEuler_Mariadb.docx`
+
 ------------------------------------------------------------------------
 
 ## **1.7 --- Script para base de datos**
@@ -127,10 +141,6 @@ Crea base y tablas para almacenar los datos de IoT.
 📄 **Archivo:** `1.7_bd.sql`
 
 Contiene el esquema de la base de datos (tablas y campos).
-
-Importa con:
-
-    mysql -u root -p < 1.7_bd.sql
 
 ------------------------------------------------------------------------
 
@@ -144,17 +154,51 @@ Este script: - Se conecta al broker MQTT.\
 
 Este puente permite la persistencia de datos IoT.
 
+Realizaremos la prueba corriendo el script y observaremos en el log que se se almacena correctamente
+
+**python3 1.8_iot_to_mariadb.py**
+
+Ahora tambien correremos el proceso en segundo plano para que este no bloquee la terminal
+
+**nohup python3 1.8_iot_to_mariadb.py > demo_iot_mariadb.log 2>&1 &**
+
+📌 ojo que **nohup** es una forma temporal de ejecutar un script en segundo plano, lo ideal es utilizar un servicio para entornos de produccion.
 ------------------------------------------------------------------------
 
 ## **1.9 --- Construcción de API para consumo de datos**
 
+Construcción de una API ( con Flask) para exponer datos que se encuentra almacenados en nuestra base de datos.
+
+Instalmos primero **pip install flask** , **pip install pymysql**
+
+Los principales metodos son:
+
+GET **/api/health**
+Permite verificar que la API se encuentra operativa. Retorna un mensaje de estado confirmando que el servicio Flask está activo y respondiendo correctamente.
+
+GET **/api/readings**
+Devuelve el listado de lecturas de sensores almacenadas en la base de datos MariaDB. Admite el parámetro opcional limit para restringir la cantidad de registros retornados (por ejemplo: /api/readings?limit=50).
+
+GET **/api/readings/latest**
+Retorna la última lectura registrada en el sistema, permitiendo acceder rápidamente al dato más reciente generado por los dispositivos IoT.
+
+GET **/api/readings/device/<device_id>**
+Permite consultar todas las lecturas asociadas a un dispositivo específico, identificado por su device_id, facilitando el análisis individual por equipo o sensor.
+
+El archivo del api es:
 📄 **Archivo:** `1.9_iot_api_data.py`
 
-Construcción de una API ( con Flask) para exponer datos.
+Asi mismo agregar a la regla de entrada el puerto **5000**
 
-Ejemplos: - `/messages` → devuelve datos IoT\
-- `/status` → estado del servidor
+Realizaremos la prueba corriendo el script y observaremos en el log que se se expone correctamente
 
+**python3 1.9_iot_api_data.py**
+
+Ahora tambien correremos el proceso en segundo plano para que este no bloquee la terminal
+
+**nohup python3 1.9_iot_api_data.py > demo_api_data.log 2>&1 &**
+
+📌 ojo que **nohup** es una forma temporal de ejecutar un script en segundo plano, lo ideal es utilizar un servicio para entornos de produccion.
 ------------------------------------------------------------------------
 
 ## **1.10 --- Test Python API**

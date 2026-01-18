@@ -32,28 +32,21 @@ def get_all_readings():
         SELECT
             id,
             device_id,
-       
             temperature,
             temperature_status,
-
             humidity,
             humidity_status,
-
             lux,
             lux_status,
-
             noise_level,
             noise_status,
-
             co_ppm,
             co_status,
-
             accel_x,
             accel_y,
             accel_z,
             accel_status,
-
-            timestamp 
+            DATE_FORMAT(timestamp, '%Y-%m-%d %H:%i:%s') AS timestamp
         FROM sensor_readings
         ORDER BY timestamp  DESC
         LIMIT %s
@@ -75,7 +68,24 @@ def get_latest_reading():
     cursor = conn.cursor()
 
     cursor.execute("""
-        SELECT *
+        SELECT 
+            id,
+            device_id,
+            temperature,
+            temperature_status,
+            humidity,
+            humidity_status,
+            lux,
+            lux_status,
+            noise_level,
+            noise_status,
+            co_ppm,
+            co_status,
+            accel_x,
+            accel_y,
+            accel_z,
+            accel_status,
+            DATE_FORMAT(timestamp, '%Y-%m-%d %H:%i:%s') AS timestamp
         FROM sensor_readings
         ORDER BY timestamp  DESC
         LIMIT 1
@@ -97,7 +107,24 @@ def get_by_device(device_id):
     cursor = conn.cursor()
 
     cursor.execute("""
-        SELECT *
+        SELECT 
+            id,
+            device_id,
+            temperature,
+            temperature_status,
+            humidity,
+            humidity_status,
+            lux,
+            lux_status,
+            noise_level,
+            noise_status,
+            co_ppm,
+            co_status,
+            accel_x,
+            accel_y,
+            accel_z,
+            accel_status,
+            DATE_FORMAT(timestamp, '%Y-%m-%d %H:%i:%s') AS timestamp
         FROM sensor_readings
         WHERE device_id = %s
         ORDER BY timestamp  DESC
