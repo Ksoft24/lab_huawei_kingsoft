@@ -46,7 +46,7 @@ def get_all_readings():
             accel_y,
             accel_z,
             accel_status,
-            DATE_FORMAT(timestamp, '%Y-%m-%d %H:%i:%s') AS timestamp
+            DATE_FORMAT(timestamp, '%%Y-%%m-%%d %%H:%%i:%%s') AS timestamp
         FROM sensor_readings
         ORDER BY timestamp  DESC
         LIMIT %s
@@ -85,7 +85,7 @@ def get_latest_reading():
             accel_y,
             accel_z,
             accel_status,
-            DATE_FORMAT(timestamp, '%Y-%m-%d %H:%i:%s') AS timestamp
+            DATE_FORMAT(timestamp, '%%Y-%%m-%%d %%H:%%i:%%s') AS timestamp
         FROM sensor_readings
         ORDER BY timestamp  DESC
         LIMIT 1
@@ -124,7 +124,7 @@ def get_by_device(device_id):
             accel_y,
             accel_z,
             accel_status,
-            DATE_FORMAT(timestamp, '%Y-%m-%d %H:%i:%s') AS timestamp
+            DATE_FORMAT(timestamp, '%%Y-%%m-%%d %%H:%%i:%%s') AS timestamp
         FROM sensor_readings
         WHERE device_id = %s
         ORDER BY timestamp  DESC
