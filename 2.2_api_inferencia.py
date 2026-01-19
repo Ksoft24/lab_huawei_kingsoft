@@ -8,12 +8,14 @@ import torch
 import clip
 from PIL import Image, ImageDraw, ImageFont
 from flask import Flask, request, jsonify
+from flask_cors import CORS
 
 # -----------------------------
 # Inicialización Flask
 # -----------------------------
 app = Flask(__name__)
 
+CORS(app)
 # -----------------------------
 # Modelo CLIP
 # -----------------------------

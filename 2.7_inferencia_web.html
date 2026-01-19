@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Cámara → API Inferencia</title>
+
+<style>
+body {
+    font-family: Arial;
+    background: #111;
+    color: #eee;
+    text-align: center;
+}
+video, img {
+    width: 480px;
+    border: 2px solid #444;
+    margin: 10px;
+}
+button {
+    padding: 12px 20px;
+    font-size: 16px;
+    cursor: pointer;
+}
+pre {
+    text-align: left;
+    display: inline-block;
+}
+</style>
+</head>
+
+<body>
+
+<h2>📷 Cámara → API Inferencia</h2>
+
+<video id="video" autoplay></video><br>
+<button id="btnCapture">📸 Capturar & Enviar</button>
+
+<h3>🖼 Imagen procesada</h3>
+<img id="resultImage">
+
+<h3>📊 Resultados</h3>
+<pre id="results"></pre>
+
+<canvas id="canvas" style="display:none;"></canvas>
+
+<script>
+/***********************
+ CONFIGURACIÓN
+************************/
+const API_URL = "http://20.40.210.148:5001/infer";
+
+const video = document.getElementById("video");
+const canvas = document.getElementById("canvas");
+const resultImage = document.getElementById("resultImage");
+const resultsBox = document.getElementById("results");
+const btn = document.getElementById("btnCapture");
+
+/***********************
+ ACTIVAR CÁMARA
+************************/
+navigator.mediaDevices.getUserMedia({ video: true })
+.then(stream => {
+    video.srcObject = stream;
+})
+.catch(err => {
+    alert("❌ No se pudo acceder a la cámara: " + err);
+});
+
+/***********************
+ FUNCIÓN PRINCIPAL
+************************/
+async function captureAndSend() {
+
+    const w = video.videoWidth;
+    const h = video.videoHeight;
+
+    if (!w || !h) {
+        alert("⚠️ La cámara aún no está lista");
+        return;
+    }
+
+    canvas.width = w;
+    canvas.height = h;
+
+    const ctx = canvas.getContext("2d");
+    ctx.drawImage(video, 0, 0, w, h);
+
+    // Base64
+    const base64Image = canvas
+        .toDataURL("image/png")
+        .replace("data:image/png;base64,", "");
+
+    const payload = {
+        id_equipo: "WEB_CAM",
+        image_base64: base64Image,
+        retorno_imagen: "SI"
+    };
+
+    resultsBox.textContent = "⏳ Enviando imagen...";
+
+    try {
+        const response = await fetch(API_URL, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload)
+        });
+
+        const data = await response.json();
+
+        // Mostrar resultados
+        let text = "";
+        if (data.results) {
+            for (const key in data.results) {
+                text += `${key.toUpperCase()}: ${data.results[key].toFixed(1)} %\n`;
+            }
+        } else {
+            text = JSON.stringify(data, null, 2);
+        }
+        resultsBox.textContent = text;
+
+        // Mostrar imagen procesada
+        if (data.imagen_base64) {
+            resultImage.src = "data:image/png;base64," + data.imagen_base64;
+        }
+
+    } catch (err) {
+        resultsBox.textContent = "❌ Error API:\n" + err;
+        console.error(err);
+    }
+}
+
+/***********************
+ EVENTO BOTÓN
+************************/
+btn.addEventListener("click", captureAndSend);
+</script>
+
+</body>
+</html>

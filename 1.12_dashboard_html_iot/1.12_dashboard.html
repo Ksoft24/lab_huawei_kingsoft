@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <title>IoT Dashboard</title>
@@ -17,21 +17,28 @@ canvas { margin-top: 20px; }
 <section class="section">
 <div class="container">
 
-<h1 class="title has-text-centered">📡 IoT Dashboard</h1>
+<h1 class="title has-text-centered">📡 IoT Dashboard - Laboratorio Kingsoft</h1>
 
 <div class="tabs is-boxed is-centered">
   <ul>
-    <li class="is-active" data-tab="latest"><a>Última Lectura</a></li>
-    <li data-tab="charts"><a>Gráficas</a></li>
+    <li class="is-active" data-tab="latest"><a>Latest Reading</a></li>
+    <li data-tab="charts"><a>Charts</a></li>
   </ul>
 </div>
 
-<!-- ================= TAB 1 ================= -->
+<!-- ================= LATEST READING ================= -->
 <div id="latest" class="tab-content">
+
+  <div class="has-text-right mb-3">
+    <button class="button is-link is-small" onclick="loadLatest()">
+      🔄 Refresh
+    </button>
+  </div>
+
   <div class="columns is-multiline" id="latestCards"></div>
 </div>
 
-<!-- ================= TAB 2 ================= -->
+<!-- ================= CHARTS ================= -->
 <div id="charts" class="tab-content" style="display:none">
 
   <div class="columns">
@@ -43,7 +50,7 @@ canvas { margin-top: 20px; }
           <option value="humidity">Humidity</option>
           <option value="lux">Lux</option>
           <option value="noise_level">Noise Level</option>
-          <option value="co_ppm">CO ppm</option>
+          <option value="co_ppm">CO (ppm)</option>
           <option value="accel_x">Accel X</option>
           <option value="accel_y">Accel Y</option>
           <option value="accel_z">Accel Z</option>
@@ -52,19 +59,19 @@ canvas { margin-top: 20px; }
     </div>
 
     <div class="column is-3">
-      <label class="label">📅 Fecha inicio</label>
+      <label class="label">📅 Start Date</label>
       <input id="startDate" class="input" type="date">
     </div>
 
     <div class="column is-3">
-      <label class="label">📅 Fecha fin</label>
+      <label class="label">📅 End Date</label>
       <input id="endDate" class="input" type="date">
     </div>
 
     <div class="column is-3">
       <label class="label">&nbsp;</label>
       <button class="button is-link is-fullwidth" onclick="loadRangeData()">
-        Filtrar
+        Apply Filter
       </button>
     </div>
   </div>
@@ -92,24 +99,27 @@ document.querySelectorAll(".tabs li").forEach(tab => {
   });
 });
 
-// ================== ÚLTIMA LECTURA ==================
+// ================== LATEST READING ==================
 async function loadLatest() {
   const res = await fetch(`${API}/readings/latest`);
   const data = await res.json();
+
   const container = document.getElementById("latestCards");
   container.innerHTML = "";
 
-  Object.entries(data).forEach(([k, v]) => {
-    if (k === "id" || k === "device_id") return;
+  Object.entries(data).forEach(([key, value]) => {
+    if (key === "id" || key === "device_id") return;
+
     container.innerHTML += `
       <div class="column is-3">
         <div class="card">
           <div class="card-content has-text-centered">
-            <p class="heading">${k}</p>
-            <p class="title is-5">${v}</p>
+            <p class="heading">${key}</p>
+            <p class="title is-5">${value}</p>
           </div>
         </div>
-      </div>`;
+      </div>
+    `;
   });
 }
 
@@ -119,12 +129,15 @@ async function loadRangeData() {
   const end = document.getElementById("endDate").value;
 
   if (!start || !end) {
-    alert("Selecciona ambas fechas");
+    alert("Please select both dates");
     return;
   }
 
-  const res = await fetch(`${API}/readings/range?start_date=${start}&end_date=${end}`);
+  const res = await fetch(
+    `${API}/readings/range?start_date=${start}&end_date=${end}`
+  );
   const data = await res.json();
+
   renderChart(data);
 }
 

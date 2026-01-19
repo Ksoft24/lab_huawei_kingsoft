@@ -213,11 +213,19 @@ Script que consume la API y valida su funcionamiento.
 
 Para visualizar datos: - Power BI Desktop → **Obtener datos \>
 Web/API**\
-- Ingresa la URL de tu API.\
+- Ingresa la URL del API.\
 - Carga y crea dashboards.
 
+📄 **Archivo:** `1.11_OpenEuler_PowerBI.docx`
 ------------------------------------------------------------------------
 
+## **1.12 --- Crear Dashboards personalizados**
+
+Una de las Ventajas de tener el api en la nube, es la capacidad de poder conectarnos con aplicaciones web, moviles o de escritorio, creamos un ejemplo para que puedas ver el potencial y puedas tu mismo generar dashboards personalizados aplicando los cursos de Desarrollo Web
+
+📄 **Archivo:** `1.12_dashboard.html`
+
+------------------------------------------------------------------------
 # 🧠 2 --- IA-CLOUD
 
 El objetivo de esta sección es aplicar **Inteligencia Artificial para análisis de imágenes**, desplegar modelos como servicios en la nube y permitir que distintos dispositivos (PC, Raspberry y ESP32-CAM) consuman estos servicios mediante APIs.
@@ -229,9 +237,14 @@ Se trabaja el flujo completo:
 
 ## **2.1 --- Notebook Python con CLIP**
 
+Primero realizaremos la instalacion de:
+
+**pip install --no-cache-dir torch torchvision --index-url https://download.pytorch.org/whl/cpu**
+**pip install --no-cache-dir pillow ftfy regex tqdm matplotlib requests git+https://github.com/openai/CLIP.git**
+
 📄 **Archivo:** `2.1_inferencia_local.py`
 
-Este módulo permite realizar **inferencia local de imágenes** utilizando una librería de visión e interpretación de contexto (por ejemplo, CLIP).  
+Este módulo permite realizar **inferencia local de imágenes** utilizando una librería de visión e interpretación de contexto (CLIP).  
 Se emplea para validar el modelo, comprender su funcionamiento y evaluar resultados antes de desplegarlo como servicio.
 
 ------------------------------------------------------------------------

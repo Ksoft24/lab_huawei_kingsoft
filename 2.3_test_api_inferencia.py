@@ -10,12 +10,12 @@ import os
 # -----------------------------
 # Configuración
 # -----------------------------
-API_URL = "http://20.40.210.148:5000/infer"
+API_URL = "http://20.40.210.148:5001/infer"
 
 # === ELIGE UNA ===
-url_o_ruta = "/home/calero/Descargas/istockphoto-1481370371-1024x1024.jpg"
+#url_o_ruta = "/home/calero/Descargas/istockphoto-1481370371-1024x1024.jpg"
 #url_o_ruta = "/home/calero/Descargas/chef-apuntando-la-lateral-sobre-fondo-blanco.jpg"
-#url_o_ruta = "https://img.freepik.com/fotos-premium/trabajador-ropa-especial-fabrica-casco-contexto-produccion_564714-11567.jpg"
+url_o_ruta = "https://img.freepik.com/fotos-premium/trabajador-ropa-especial-fabrica-casco-contexto-produccion_564714-11567.jpg"
 
 OUTPUT_IMAGE = "resultado.png"
 
@@ -40,15 +40,24 @@ def base64_to_image(base64_str, output_path):
     image_bytes = base64.b64decode(base64_str)
     image = Image.open(BytesIO(image_bytes))
 
-    base_dir = "/home/calero/HUAWEI_ICT_TEACHING_2026/IMG"
+    # 📁 Directorio donde se ejecuta el script
+    current_dir = os.getcwd()
 
+    # 📂 Carpeta destino: HUAWEI_ICT_TEACHING_2026/IMG
+    base_dir = os.path.join(current_dir, "HUAWEI_ICT_TEACHING_2026", "IMG")
+
+    # ✅ Crear carpeta si no existe (Windows / Linux)
+    os.makedirs(base_dir, exist_ok=True)
+
+    # 🏷️ Nombre único para no sobrescribir
     name, ext = os.path.splitext(output_path)
     unique_id = f"{int(time.time())}_{random.randint(1000,9999)}"
-
     final_name = f"{name}_{unique_id}{ext}"
     final_path = os.path.join(base_dir, final_name)
 
+    # 💾 Guardar imagen
     image.save(final_path)
+
     return final_path
 
 
@@ -90,8 +99,10 @@ if response.status_code == 200:
         print(f"  {k}: {v}%")
 
     if data.get("imagen_base64"):
-        base64_to_image(data["imagen_base64"], OUTPUT_IMAGE)
-        print(f"\n🖼 Imagen resultado guardada en: {OUTPUT_IMAGE}")
+        #base64_to_image(data["imagen_base64"], OUTPUT_IMAGE)
+        #print(f"\n🖼 Imagen resultado guardada en: {OUTPUT_IMAGE}")
+        ruta_real = base64_to_image(data["imagen_base64"], OUTPUT_IMAGE)
+        print(f"\n🖼 Imagen guardada en:\n{ruta_real}")
 
     
 
