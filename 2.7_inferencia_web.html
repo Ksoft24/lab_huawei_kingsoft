@@ -1,45 +1,86 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
 <meta charset="utf-8">
 <title>Cámara → API Inferencia</title>
 
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<!-- Bulma CSS -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
+
 <style>
 body {
-    font-family: Arial;
-    background: #111;
-    color: #eee;
-    text-align: center;
+    background: #0f0f0f;
 }
-video, img {
-    width: 480px;
-    border: 2px solid #444;
-    margin: 10px;
+
+.video-box video,
+.video-box img {
+    width: 100%;
+    border-radius: 10px;
+    border: 2px solid #2f2f2f;
 }
-button {
-    padding: 12px 20px;
-    font-size: 16px;
-    cursor: pointer;
-}
+
 pre {
-    text-align: left;
-    display: inline-block;
+    background: #111;
+    color: #00ffae;
+    padding: 10px;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    overflow-x: auto;
 }
 </style>
 </head>
 
 <body>
 
-<h2>📷 Cámara → API Inferencia</h2>
+<section class="section">
+<div class="container">
 
-<video id="video" autoplay></video><br>
-<button id="btnCapture">📸 Capturar & Enviar</button>
+    <!-- Header -->
+    <h1 class="title has-text-centered has-text-light">
+        📷 Cámara → API Inferencia
+    </h1>
+    <p class="subtitle has-text-centered has-text-grey-light">
+        Captura desde navegador y envío directo al API
+    </p>
 
-<h3>🖼 Imagen procesada</h3>
-<img id="resultImage">
+    <!-- Grid -->
+    <div class="columns is-multiline">
 
-<h3>📊 Resultados</h3>
-<pre id="results"></pre>
+        <!-- Cámara -->
+        <div class="column is-12-tablet is-6-desktop">
+            <div class="box has-background-dark video-box">
+                <h3 class="title is-5 has-text-light">🎥 Cámara</h3>
+                <video id="video" autoplay playsinline></video>
+
+                <div class="has-text-centered mt-4">
+                    <button id="btnCapture" class="button is-primary is-medium is-fullwidth">
+                        📸 Capturar & Enviar
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Imagen procesada -->
+        <div class="column is-12-tablet is-6-desktop">
+            <div class="box has-background-dark video-box">
+                <h3 class="title is-5 has-text-light">🖼 Imagen Procesada</h3>
+                <img id="resultImage">
+            </div>
+        </div>
+
+        <!-- Resultados -->
+        <div class="column is-12">
+            <div class="box has-background-dark">
+                <h3 class="title is-5 has-text-light">📊 Resultados</h3>
+                <pre id="results">Esperando captura...</pre>
+            </div>
+        </div>
+
+    </div>
+</div>
+</section>
 
 <canvas id="canvas" style="display:none;"></canvas>
 
@@ -85,7 +126,7 @@ async function captureAndSend() {
     const ctx = canvas.getContext("2d");
     ctx.drawImage(video, 0, 0, w, h);
 
-    // Base64
+    // Base64 limpio
     const base64Image = canvas
         .toDataURL("image/png")
         .replace("data:image/png;base64,", "");
@@ -107,7 +148,7 @@ async function captureAndSend() {
 
         const data = await response.json();
 
-        // Mostrar resultados
+        // Resultados
         let text = "";
         if (data.results) {
             for (const key in data.results) {
@@ -118,7 +159,7 @@ async function captureAndSend() {
         }
         resultsBox.textContent = text;
 
-        // Mostrar imagen procesada
+        // Imagen procesada
         if (data.imagen_base64) {
             resultImage.src = "data:image/png;base64," + data.imagen_base64;
         }

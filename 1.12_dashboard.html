@@ -4,35 +4,68 @@
 <meta charset="UTF-8">
 <title>IoT Dashboard</title>
 
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
-canvas { margin-top: 20px; }
+/* ---------- UI Ajustes ---------- */
+body {
+  background: #f5f7fa;
+}
+
+.card {
+  height: 100%;
+}
+
+canvas {
+  width: 100% !important;
+  max-height: 420px;
+}
+
+.tabs ul {
+  flex-wrap: wrap;
+}
+
+/* ---------- Mobile tweaks ---------- */
+@media (max-width: 768px) {
+  .title {
+    font-size: 1.4rem;
+  }
+}
 </style>
 </head>
 
-<body class="has-background-light">
+<body>
 
 <section class="section">
 <div class="container">
 
-<h1 class="title has-text-centered">📡 IoT Dashboard - Laboratorio Kingsoft</h1>
+<h1 class="title has-text-centered">
+  📡 IoT Dashboard - Laboratorio Kingsoft
+</h1>
 
-<div class="tabs is-boxed is-centered">
+<!-- ================= TABS ================= -->
+<div class="tabs is-boxed is-centered is-small-mobile">
   <ul>
-    <li class="is-active" data-tab="latest"><a>Latest Reading</a></li>
-    <li data-tab="charts"><a>Charts</a></li>
+    <li class="is-active" data-tab="latest"><a>📋 Latest</a></li>
+    <li data-tab="charts"><a>📈 Charts</a></li>
   </ul>
 </div>
 
 <!-- ================= LATEST READING ================= -->
 <div id="latest" class="tab-content">
 
-  <div class="has-text-right mb-3">
-    <button class="button is-link is-small" onclick="loadLatest()">
-      🔄 Refresh
-    </button>
+  <div class="level mb-3">
+    <div class="level-left">
+      <strong>Última lectura</strong>
+    </div>
+    <div class="level-right">
+      <button class="button is-link is-small" onclick="loadLatest()">
+        🔄 Refresh
+      </button>
+    </div>
   </div>
 
   <div class="columns is-multiline" id="latestCards"></div>
@@ -41,8 +74,10 @@ canvas { margin-top: 20px; }
 <!-- ================= CHARTS ================= -->
 <div id="charts" class="tab-content" style="display:none">
 
-  <div class="columns">
-    <div class="column is-3">
+  <!-- Filters -->
+  <div class="columns is-multiline is-mobile">
+
+    <div class="column is-12-mobile is-3-tablet is-3-desktop">
       <label class="label">📊 Variable</label>
       <div class="select is-fullwidth">
         <select id="variableSelect">
@@ -58,24 +93,26 @@ canvas { margin-top: 20px; }
       </div>
     </div>
 
-    <div class="column is-3">
-      <label class="label">📅 Start Date</label>
+    <div class="column is-6-mobile is-3-tablet is-3-desktop">
+      <label class="label">📅 Start</label>
       <input id="startDate" class="input" type="date">
     </div>
 
-    <div class="column is-3">
-      <label class="label">📅 End Date</label>
+    <div class="column is-6-mobile is-3-tablet is-3-desktop">
+      <label class="label">📅 End</label>
       <input id="endDate" class="input" type="date">
     </div>
 
-    <div class="column is-3">
+    <div class="column is-12-mobile is-3-tablet is-3-desktop">
       <label class="label">&nbsp;</label>
       <button class="button is-link is-fullwidth" onclick="loadRangeData()">
         Apply Filter
       </button>
     </div>
+
   </div>
 
+  <!-- Chart -->
   <div class="box">
     <canvas id="chart"></canvas>
   </div>
@@ -111,7 +148,7 @@ async function loadLatest() {
     if (key === "id" || key === "device_id") return;
 
     container.innerHTML += `
-      <div class="column is-3">
+      <div class="column is-12-mobile is-6-tablet is-3-desktop">
         <div class="card">
           <div class="card-content has-text-centered">
             <p class="heading">${key}</p>
@@ -155,11 +192,13 @@ function renderChart(data) {
         label: variable,
         data: data.map(r => r[variable]),
         borderWidth: 2,
+        tension: 0.3,
         fill: false
       }]
     },
     options: {
       responsive: true,
+      maintainAspectRatio: false,
       scales: {
         x: {
           ticks: { maxRotation: 45 }
