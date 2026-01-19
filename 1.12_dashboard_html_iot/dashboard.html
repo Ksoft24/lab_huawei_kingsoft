@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>IoT Dashboard</title>
+
+  <!-- Bulma -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
+
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <style>
+    canvas {
+      margin-bottom: 40px;
+    }
+  </style>
+</head>
+
+<body class="has-background-light">
+
+<section class="section">
+  <div class="container">
+
+    <h1 class="title has-text-centered">📡 IoT Dashboard</h1>
+
+    <!-- Tabs -->
+    <div class="tabs is-boxed is-centered">
+      <ul>
+        <li class="is-active" data-tab="latest"><a>Última Lectura</a></li>
+        <li data-tab="charts"><a>Gráficas</a></li>
+      </ul>
+    </div>
+
+    <!-- ================= TAB 1 ================= -->
+    <div id="latest" class="tab-content">
+      <div class="columns is-multiline" id="latestCards"></div>
+    </div>
+
+    <!-- ================= TAB 2 ================= -->
+    <div id="charts" class="tab-content" style="display:none">
+
+      <div class="field">
+        <label class="label">📅 Filtrar por día</label>
+        <div class="control">
+          <input id="dateFilter" class="input" type="date">
+        </div>
+      </div>
+
+      <div id="chartsContainer"></div>
+
+    </div>
+
+  </div>
+</section>
+
+<script>
+const API_BASE = "http://20.40.210.148:5000/api";
+
+// ================== TABS ==================
+document.querySelectorAll(".tabs li").forEach(tab => {
+  tab.addEventListener("click", () => {
+    document.querySelectorAll(".tabs li").forEach(t => t.classList.remove("is-active"));
+    tab.classList.add("is-active");
+
+    document.querySelectorAll(".tab-content").forEach(c => c.style.display = "none");
+    document.getElementById(tab.dataset.tab).style.display = "block";
+  });
+});
+
+// ================== TAB 1: ÚLTIMA LECTURA ==================
+async function loadLatest() {
+  const res = await fetch(`${API_BASE}/readings/latest`);
+  const data = await res.json();
+
+  const container = document.getElementById("latestCards");
+  container.innerHTML = "";
+
+  Object.entries(data).forEach(([key, value]) => {
+    if (key === "id" || key === "device_id") return;
+
+    container.innerHTML += `
+      <div class="column is-3">
+        <div class="card">
+          <div class="card-content has-text-centered">
+            <p class="heading">${key}</p>
+            <p class="title is-5">${value}</p>
+          </div>
+        </div>
+      </div>
+    `;
+  });
+}
+
+// ================== TAB 2: GRÁFICAS ==================
+let charts = [];
+
+async function loadCharts() {
+  const res = await fetch(`${API_BASE}/readings?limit=1000`);
+  const data = await res.json();
+
+  const dateInput = document.getElementById("dateFilter");
+
+  function filterByDate() {
+    const selectedDate = dateInput.value;
+    if (!selectedDate) return data;
+
+    return data.filter(r => r.timestamp.startsWith(selectedDate));
+  }
+
+  function renderCharts() {
+    charts.forEach(c => c.destroy());
+    charts = [];
+
+    const filtered = filterByDate();
+    const container = document.getElementById("chartsContainer");
+    container.innerHTML = "";
+
+    const numericFields = [
+      "temperature",
+      "humidity",
+      "lux",
+      "noise_level",
+      "co_ppm",
+      "accel_x",
+      "accel_y",
+      "accel_z"
+    ];
+
+    numericFields.forEach(field => {
+      const canvasId = `chart_${field}`;
+
+      container.innerHTML += `
+        <div class="box">
+          <h2 class="subtitle">${field}</h2>
+          <canvas id="${canvasId}"></canvas>
+        </div>
+      `;
+
+      const ctx = document.getElementById(canvasId);
+
+      const chart = new Chart(ctx, {
+        type: "line",
+        data: {
+          labels: filtered.map(r => r.timestamp),
+          datasets: [{
+            label: field,
+            data: filtered.map(r => r[field]),
+            borderWidth: 2,
+            fill: false
+          }]
+        },
+        options: {
+          responsive: true,
+          scales: {
+            x: {
+              ticks: { maxRotation: 45 }
+            }
+          }
+        }
+      });
+
+      charts.push(chart);
+    });
+  }
+
+  dateInput.addEventListener("change", renderCharts);
+  renderCharts();
+}
+
+// ================== INIT ==================
+loadLatest();
+loadCharts();
+</script>
+
+</body>
+</html>

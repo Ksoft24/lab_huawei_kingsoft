@@ -169,7 +169,7 @@ Ahora tambien correremos el proceso en segundo plano para que este no bloquee la
 
 Construcción de una API ( con Flask) para exponer datos que se encuentra almacenados en nuestra base de datos.
 
-Instalmos primero **pip install flask** , **pip install pymysql**
+Instalmos primero **pip install flask** , **pip install flask-cors**, **pip install pymysql**
 
 Los principales metodos son:
 
