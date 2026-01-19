@@ -139,6 +139,52 @@ def get_by_device(device_id):
 
     return jsonify(rows)
 
+@app.route("/api/readings/range", methods=["GET"])
+def get_readings_by_range():
+    """
+    Filtra lecturas por rango de fechas (día completo)
+    """
+    start_date = request.args.get("start_date")
+    end_date = request.args.get("end_date")
+
+    if not start_date or not end_date:
+        return jsonify({"error": "start_date y end_date son requeridos"}), 400
+
+    start_datetime = f"{start_date} 00:00:00"
+    end_datetime = f"{end_date} 23:59:59"
+
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        SELECT 
+            id,
+            device_id,
+            temperature,
+            temperature_status,
+            humidity,
+            humidity_status,
+            lux,
+            lux_status,
+            noise_level,
+            noise_status,
+            co_ppm,
+            co_status,
+            accel_x,
+            accel_y,
+            accel_z,
+            accel_status,
+            CAST(DATE_FORMAT(timestamp, '%%Y-%%m-%%d %%H:%%i:%%s') AS CHAR) AS timestamp
+        FROM sensor_readings
+        WHERE timestamp BETWEEN %s AND %s
+        ORDER BY timestamp ASC
+    """, (start_datetime, end_datetime))
+
+    rows = cursor.fetchall()
+    cursor.close()
+    conn.close()
+
+    return jsonify(rows)
 
 @app.route("/api/health", methods=["GET"])
 def health():

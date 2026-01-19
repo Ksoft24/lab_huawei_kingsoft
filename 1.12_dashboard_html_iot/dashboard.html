@@ -1,176 +1,163 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <title>IoT Dashboard</title>
+<meta charset="UTF-8">
+<title>IoT Dashboard</title>
 
-  <!-- Bulma -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-  <!-- Chart.js -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-  <style>
-    canvas {
-      margin-bottom: 40px;
-    }
-  </style>
+<style>
+canvas { margin-top: 20px; }
+</style>
 </head>
 
 <body class="has-background-light">
 
 <section class="section">
-  <div class="container">
+<div class="container">
 
-    <h1 class="title has-text-centered">📡 IoT Dashboard</h1>
+<h1 class="title has-text-centered">📡 IoT Dashboard</h1>
 
-    <!-- Tabs -->
-    <div class="tabs is-boxed is-centered">
-      <ul>
-        <li class="is-active" data-tab="latest"><a>Última Lectura</a></li>
-        <li data-tab="charts"><a>Gráficas</a></li>
-      </ul>
-    </div>
+<div class="tabs is-boxed is-centered">
+  <ul>
+    <li class="is-active" data-tab="latest"><a>Última Lectura</a></li>
+    <li data-tab="charts"><a>Gráficas</a></li>
+  </ul>
+</div>
 
-    <!-- ================= TAB 1 ================= -->
-    <div id="latest" class="tab-content">
-      <div class="columns is-multiline" id="latestCards"></div>
-    </div>
+<!-- ================= TAB 1 ================= -->
+<div id="latest" class="tab-content">
+  <div class="columns is-multiline" id="latestCards"></div>
+</div>
 
-    <!-- ================= TAB 2 ================= -->
-    <div id="charts" class="tab-content" style="display:none">
+<!-- ================= TAB 2 ================= -->
+<div id="charts" class="tab-content" style="display:none">
 
-      <div class="field">
-        <label class="label">📅 Filtrar por día</label>
-        <div class="control">
-          <input id="dateFilter" class="input" type="date">
-        </div>
+  <div class="columns">
+    <div class="column is-3">
+      <label class="label">📊 Variable</label>
+      <div class="select is-fullwidth">
+        <select id="variableSelect">
+          <option value="temperature">Temperature</option>
+          <option value="humidity">Humidity</option>
+          <option value="lux">Lux</option>
+          <option value="noise_level">Noise Level</option>
+          <option value="co_ppm">CO ppm</option>
+          <option value="accel_x">Accel X</option>
+          <option value="accel_y">Accel Y</option>
+          <option value="accel_z">Accel Z</option>
+        </select>
       </div>
-
-      <div id="chartsContainer"></div>
-
     </div>
 
+    <div class="column is-3">
+      <label class="label">📅 Fecha inicio</label>
+      <input id="startDate" class="input" type="date">
+    </div>
+
+    <div class="column is-3">
+      <label class="label">📅 Fecha fin</label>
+      <input id="endDate" class="input" type="date">
+    </div>
+
+    <div class="column is-3">
+      <label class="label">&nbsp;</label>
+      <button class="button is-link is-fullwidth" onclick="loadRangeData()">
+        Filtrar
+      </button>
+    </div>
   </div>
+
+  <div class="box">
+    <canvas id="chart"></canvas>
+  </div>
+
+</div>
+
+</div>
 </section>
 
 <script>
-const API_BASE = "http://20.40.210.148:5000/api";
+const API = "http://20.40.210.148:5000/api";
+let chart;
 
 // ================== TABS ==================
 document.querySelectorAll(".tabs li").forEach(tab => {
   tab.addEventListener("click", () => {
     document.querySelectorAll(".tabs li").forEach(t => t.classList.remove("is-active"));
     tab.classList.add("is-active");
-
     document.querySelectorAll(".tab-content").forEach(c => c.style.display = "none");
     document.getElementById(tab.dataset.tab).style.display = "block";
   });
 });
 
-// ================== TAB 1: ÚLTIMA LECTURA ==================
+// ================== ÚLTIMA LECTURA ==================
 async function loadLatest() {
-  const res = await fetch(`${API_BASE}/readings/latest`);
+  const res = await fetch(`${API}/readings/latest`);
   const data = await res.json();
-
   const container = document.getElementById("latestCards");
   container.innerHTML = "";
 
-  Object.entries(data).forEach(([key, value]) => {
-    if (key === "id" || key === "device_id") return;
-
+  Object.entries(data).forEach(([k, v]) => {
+    if (k === "id" || k === "device_id") return;
     container.innerHTML += `
       <div class="column is-3">
         <div class="card">
           <div class="card-content has-text-centered">
-            <p class="heading">${key}</p>
-            <p class="title is-5">${value}</p>
+            <p class="heading">${k}</p>
+            <p class="title is-5">${v}</p>
           </div>
         </div>
-      </div>
-    `;
+      </div>`;
   });
 }
 
-// ================== TAB 2: GRÁFICAS ==================
-let charts = [];
+// ================== RANGE DATA ==================
+async function loadRangeData() {
+  const start = document.getElementById("startDate").value;
+  const end = document.getElementById("endDate").value;
 
-async function loadCharts() {
-  const res = await fetch(`${API_BASE}/readings?limit=1000`);
+  if (!start || !end) {
+    alert("Selecciona ambas fechas");
+    return;
+  }
+
+  const res = await fetch(`${API}/readings/range?start_date=${start}&end_date=${end}`);
   const data = await res.json();
+  renderChart(data);
+}
 
-  const dateInput = document.getElementById("dateFilter");
+// ================== CHART ==================
+function renderChart(data) {
+  const variable = document.getElementById("variableSelect").value;
 
-  function filterByDate() {
-    const selectedDate = dateInput.value;
-    if (!selectedDate) return data;
+  if (chart) chart.destroy();
 
-    return data.filter(r => r.timestamp.startsWith(selectedDate));
-  }
-
-  function renderCharts() {
-    charts.forEach(c => c.destroy());
-    charts = [];
-
-    const filtered = filterByDate();
-    const container = document.getElementById("chartsContainer");
-    container.innerHTML = "";
-
-    const numericFields = [
-      "temperature",
-      "humidity",
-      "lux",
-      "noise_level",
-      "co_ppm",
-      "accel_x",
-      "accel_y",
-      "accel_z"
-    ];
-
-    numericFields.forEach(field => {
-      const canvasId = `chart_${field}`;
-
-      container.innerHTML += `
-        <div class="box">
-          <h2 class="subtitle">${field}</h2>
-          <canvas id="${canvasId}"></canvas>
-        </div>
-      `;
-
-      const ctx = document.getElementById(canvasId);
-
-      const chart = new Chart(ctx, {
-        type: "line",
-        data: {
-          labels: filtered.map(r => r.timestamp),
-          datasets: [{
-            label: field,
-            data: filtered.map(r => r[field]),
-            borderWidth: 2,
-            fill: false
-          }]
-        },
-        options: {
-          responsive: true,
-          scales: {
-            x: {
-              ticks: { maxRotation: 45 }
-            }
-          }
+  chart = new Chart(document.getElementById("chart"), {
+    type: "line",
+    data: {
+      labels: data.map(r => r.timestamp),
+      datasets: [{
+        label: variable,
+        data: data.map(r => r[variable]),
+        borderWidth: 2,
+        fill: false
+      }]
+    },
+    options: {
+      responsive: true,
+      scales: {
+        x: {
+          ticks: { maxRotation: 45 }
         }
-      });
-
-      charts.push(chart);
-    });
-  }
-
-  dateInput.addEventListener("change", renderCharts);
-  renderCharts();
+      }
+    }
+  });
 }
 
 // ================== INIT ==================
 loadLatest();
-loadCharts();
 </script>
 
 </body>
