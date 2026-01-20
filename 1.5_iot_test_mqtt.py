@@ -4,7 +4,7 @@ import random
 import paho.mqtt.client as mqtt
 
 # ================ MQTT CONFIG =================
-#IP PUBLICA DEL SERVIDOR 
+# PUBLIC SERVER IP
 BROKER_IP = "20.40.210.148"
 BROKER_PORT = 1883
 TOPIC = "lab/sensors/device01"
@@ -22,7 +22,7 @@ def generate_payload(fall=False):
     if fall:
         ax = random.uniform(1.5, 2.5)
         ay = random.uniform(1.5, 2.5)
-        az = random.uniform(2.2, 3.0)   # impacto
+        az = random.uniform(2.2, 3.0)   # impact
     else:
         ax = random.uniform(0.0, 0.2)
         ay = random.uniform(0.0, 0.2)
@@ -48,7 +48,7 @@ def generate_payload(fall=False):
 print("🚀 Sending test MQTT payloads...")
 
 while True:
-    # Cada 10 mensajes, simula una caída
+    # Every 10 messages, simulate a fall event
     simulate_fall = random.randint(1, 10) == 10
 
     payload = generate_payload(fall=simulate_fall)

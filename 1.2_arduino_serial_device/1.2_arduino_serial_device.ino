@@ -4,13 +4,13 @@
 #include <Adafruit_MPU6050.h>
 #include <Adafruit_Sensor.h>
 
-// ================= PINES =================
+// ================= PINS =================
 #define MQ7_PIN    A0
 #define SOUND_PIN  A1
 #define DHT_PIN    3
-#define DHTTYPE    DHT22   // Cambia a DHT11 si corresponde
+#define DHTTYPE    DHT22   // Change to DHT11 if needed
 
-// ================= OBJETOS =================
+// ================= OBJECTS =================
 DHT dht(DHT_PIN, DHTTYPE);
 BH1750 lightMeter;
 Adafruit_MPU6050 mpu;
@@ -20,7 +20,7 @@ void setup() {
   Serial.begin(9600);
   delay(1000);
 
-  Serial.println("=== INICIANDO SENSORES ===");
+  Serial.println("=== INITIALIZING SENSORS ===");
 
   // I2C
   Wire.begin();
@@ -30,26 +30,26 @@ void setup() {
 
   // BH1750
   if (!lightMeter.begin(BH1750::CONTINUOUS_HIGH_RES_MODE)) {
-    Serial.println("❌ Error: BH1750 no detectado");
+    Serial.println("❌ Error: BH1750 not detected");
     while (1);
   }
 
   // MPU6050
   if (!mpu.begin()) {
-    Serial.println("❌ Error: MPU6050 no detectado");
+    Serial.println("❌ Error: MPU6050 not detected");
     while (1);
   }
 
   mpu.setAccelerometerRange(MPU6050_RANGE_4_G);
   mpu.setFilterBandwidth(MPU6050_BAND_21_HZ);
 
-  Serial.println("✅ Sensores listos\n");
+  Serial.println("✅ Sensors ready\n");
 }
 
 // ================= LOOP =================
 void loop() {
 
-  // ---------- Lecturas analógicas ----------
+  // ---------- Analog readings ----------
   int mq7Raw   = analogRead(MQ7_PIN);
   int soundRaw = analogRead(SOUND_PIN);
 
@@ -58,7 +58,7 @@ void loop() {
   float hum  = dht.readHumidity();
 
   if (isnan(temp) || isnan(hum)) {
-    Serial.println("⚠️ Error leyendo DHT");
+    Serial.println("⚠️ Error reading DHT sensor");
   }
 
   // ---------- BH1750 ----------
@@ -72,22 +72,22 @@ void loop() {
   float ay = accel.acceleration.y;
   float az = accel.acceleration.z;
 
-  // ---------- Mostrar por Serial ----------
-  Serial.println("----------- LECTURAS -----------");
+  // ---------- Display on Serial ----------
+  Serial.println("----------- SENSOR READINGS -----------");
 
   Serial.print("MQ7 (CO RAW): ");
   Serial.println(mq7Raw);
 
-  Serial.print("Sonido RAW: ");
+  Serial.print("Sound RAW: ");
   Serial.println(soundRaw);
 
-  Serial.print("Temperatura (°C): ");
+  Serial.print("Temperature (°C): ");
   Serial.println(temp);
 
-  Serial.print("Humedad (%): ");
+  Serial.print("Humidity (%): ");
   Serial.println(hum);
 
-  Serial.print("Luz (Lux): ");
+  Serial.print("Light (Lux): ");
   Serial.println(lux);
 
   Serial.print("Accel X (m/s2): ");
@@ -99,7 +99,7 @@ void loop() {
   Serial.print("Accel Z (m/s2): ");
   Serial.println(az);
 
-  Serial.println("--------------------------------\n");
+  Serial.println("---------------------------------------\n");
 
-  delay(2000);   // cada 2 segundos
+  delay(2000);   // every 2 seconds
 }

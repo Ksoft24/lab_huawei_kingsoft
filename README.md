@@ -24,7 +24,7 @@ Incluye un esquema de conexión de dispositivos con microcontralador y tarjeta W
 
 
 <p align="center">
-  <img src="1.1 img_board_bb.png" width="500">
+  <img src="1.1_img_board_bb.png" width="500">
 </p>
 
 Materiales
@@ -46,19 +46,34 @@ Nodo de procesamiento y pruebas con OpenEuler.
 
 🛢️ MQ-7 - Sensor de Monoxido de Carbono
 
-Camara web USB
+   KY-037 - Sensor de Sonido
 
-Realizar la Integracion del Arduino conforme el Diagrama
-Realizar la Integracion de la ESP32-CAM, conforme al diagram
-Colocar la Camara Web al puerto usb de Raspberry pi 4B
+   Camara web USB
+
+Realizar el montaje del circuito conforme al diagrama eléctrico.
+
+Colocar la Camara Web al puerto usb de Raspberry pi 4B.
+
 ------------------------------------------------------------------------
 
 ## **1.2 --- Código Arduino**
 
 Este código se usa para probar la obtencion de datos desde un Microcontrolador.\
+Cargar el codigo al microcontrolador para validar la obtencion de los datos.
+Activar el monitor serial y obtendras un log como el siguiente:
+
+----------- SENSOR READINGS -----------
+MQ7 (CO RAW): 498
+Sound RAW: 190
+Temperature (°C): 25.32
+Humidity (%): 55.90
+Light (Lux): 351.10
+Accel X (m/s2): -0.05
+Accel Y (m/s2): 9.79
+Accel Z (m/s2): 0.24
+---------------------------------------
 
 📄 **Archivo:** `arduino_1.2_serial_device.ino`
-
 
 ------------------------------------------------------------------------
 
@@ -80,28 +95,39 @@ MQTT Broker, API, bases de datos).
 
 MQTT es un **protocolo ligero de mensajería para IoT**.
 
-En nuestro servidor con OpenEuler, instalaremos el broker Mosquitto:
+En nuestro servidor con OpenEuler, instalaremos el broker Mosquitto, lo configuraremos para permitir conexiones.
 
-    sudo dnf install mosquitto
-    sudo systemctl enable --now mosquitto
-
-Configura el archivo **mosquitto.conf** para permitir conexiones.
-
-Asi mismo revisa la guia detallada de instalacion en el documento
+Revisa la guia detallada de instalacion en el documento:
 
 📄 **Archivo:** `1.4_OpenEuler_MQTT.docx`
 
-📌 **El broker escuchará conexiones MQTT a las que tus dispositivos se
-suscribirán/publicarán.**
+📌 El broker escuchará conexiones MQTT a las que tus dispositivos se suscribirán/publicarán.
 
 ------------------------------------------------------------------------
 
 ## **1.5 --- Test Python MQTT**
 
+Este script prueba la conexión vía MQTT desde Python al broker, publica
+mensajes, confirmando la correcta configuracion.
+
+Es necesario ajustar los siguientes parametros, en el archivo del programa:
+
+================ MQTT CONFIG =================
+PUBLIC SERVER IP
+**BROKER_IP = "0.0.0.0"**
+BROKER_PORT = 1883
+TOPIC = "lab/sensors/device01"
+
+**USERNAME = "USUARIO"**
+**PASSWORD = "CLAVE"**
+
 📄 **Archivo:** `1.5_iot_test_mqtt.py`
 
-Este script prueba la conexión vía MQTT desde Python al broker, publica
-y/o consume mensajes.
+Si la conexión se realiza correctamente, en la terminal se visualizarán los siguientes mensajes:
+
+📤 Sent: {'device_id': 'opta01', 'temp': 27.84, 'hum': 61.22, 'lux': 834, 'noise': 542, 'co': 34.91, 'ax': 0.12, 'ay': 0.08, 'az': 0.97}
+📤 Sent: {'device_id': 'opta01', 'temp': 28.01, 'hum': 60.85, 'lux': 812, 'noise': 559, 'co': 36.10, 'ax': 0.11, 'ay': 0.05, 'az': 1.02}
+...
 
 ------------------------------------------------------------------------
 
@@ -109,6 +135,32 @@ y/o consume mensajes.
 
 Versión más completa del sketch Arduino que se conecta al broker MQTT
 con credenciales y publica datos periódicamente.
+
+Es necesario ajustar los parametros:
+
+================= WIFI =================
+**const char* WIFI_SSID = "RED";** 
+**const char* WIFI_PASS = "clave";**
+
+================= MQTT =================
+**const char* MQTT_BROKER   = "0.0.0.0";** 
+const int   MQTT_PORT     = 1883;
+**const char* MQTT_USER     = "USUARIO";** 
+**const char* MQTT_PASSWORD = "clavemqtt";** 
+const char* MQTT_TOPIC    = "lab/sensors/device01";
+
+Si la conexión se realiza correctamente, en la terminal se visualizarán los siguientes mensajes:
+
+Conectando a WiFi....
+✅ WiFi conectado
+IP: 192.168.1.108
+Conectando a MQTT... 
+✅ Conectado
+📤 MQTT: {"device_id":"device01","temp":25.1,"hum":57.4,"lux":298,"noise":405,"co":128.7,"ax":0.01,"ay":9.80,"az":0.19}
+📤 MQTT: {"device_id":"device01","temp":25.3,"hum":56.9,"lux":305,"noise":418,"co":130.1,"ax":-0.02,"ay":9.79,"az":0.21}
+...
+
+El archivo donde encontrara el codigo de prueba:
 
 📄 **Archivo:** `arduino_1.6_iot_device.ino`
 
@@ -119,18 +171,11 @@ broker MQTT (URL y credenciales).**
 
 ## **1.7 ---  Instalación y configuración Mariadb en OpenEuler**
 
-Mariadb es un **motor de base de datos relacional** que almacenará los
-eventos/datos recolectados desde MQTT.
+MariaDB es un **sistema de gestión de bases de datos relacional (RDBMS)** que permitirá almacenar de forma persistente los eventos y datos recolectados desde los dispositivos IoT a través de MQTT.
 
-En tu ECS con OpenEuler:
+Se debe asegurar correctamente la instalación del servicio, así como la creación de la base de datos y las tablas necesarias para el almacenamiento de la información.
 
-    sudo dnf install mysql-server
-    sudo systemctl enable --now mysqld
-
-Asegura tu instalación (**mysql_secure_installation**).\
-Crea base y tablas para almacenar los datos de IoT.
-
-Asi mismo revisa la guia detallada de instalacion en el documento
+Asimismo, se recomienda revisar la guía detallada de instalación y configuración en el siguiente documento:
 
 📄 **Archivo:** `1.7_OpenEuler_Mariadb.docx`
 
@@ -138,57 +183,86 @@ Asi mismo revisa la guia detallada de instalacion en el documento
 
 ## **1.7 --- Script para base de datos**
 
-📄 **Archivo:** `1.7_bd.sql`
+Este script define la estructura de la tabla `sensor_readings`, la cual almacena los datos capturados por los dispositivos IoT, incluyendo variables ambientales, niveles de ruido, concentración de gases y aceleración, así como indicadores de estado para cada medición.
 
-Contiene el esquema de la base de datos (tablas y campos).
+📄 **Archivo:** `1.7_bd.sql`
 
 ------------------------------------------------------------------------
 
 ## **1.8 --- Código de almacenamiento MQTT a MySQL**
 
+Este script actúa como un puente de integración entre MQTT y MariaDB, permitiendo almacenar de forma automática los datos enviados por los dispositivos IoT.
+El script se conecta a un broker MQTT, se suscribe a los tópicos configurados (lab/sensors/#), recibe mensajes en formato JSON y evalúa el estado de cada variable mediante umbrales de seguridad (NORMAL, RISK y CRITICAL). Además, detecta posibles eventos de caída utilizando datos del acelerómetro, inserta los datos procesados en la base de datos MariaDB/MySQL y muestra en consola cada registro almacenado, garantizando la correcta persistencia.
+
 📄 **Archivo:** `1.8_iot_to_mysql_safety.py`
 
-Este script: - Se conecta al broker MQTT.\
-- Se subscribe a topics.\
-- Inserta los mensajes recibidos en MySQL.
-
-Este puente permite la persistencia de datos IoT.
-
-Realizaremos la prueba corriendo el script y observaremos en el log que se se almacena correctamente
+Realizaremos la prueba corriendo el script 
 
 **python3 1.8_iot_to_mariadb.py**
 
-Ahora tambien correremos el proceso en segundo plano para que este no bloquee la terminal
+Si la conexión se realiza correctamente, en la terminal del servidor se visualizarán los siguientes mensajes:
+
+📡 Listening to MQTT messages...
+✅ Connected to MQTT broker
+
+💾 Saved: {
+  'device_id': 'opta01',
+  'temperature': 24.6,
+  'humidity': 55.2,
+  'lux': 320,
+  'noise': 410,
+  'co': 12,
+  'ax': 0.02,
+  'ay': -0.01,
+  'az': 1.01,
+  'temperature_status': 'NORMAL',
+  'humidity_status': 'NORMAL',
+  'lux_status': 'NORMAL',
+  'noise_status': 'RISK',
+  'co_status': 'NORMAL',
+  'accel_status': 'NORMAL'
+}
+...
+
+Ahora tambien correremos el proceso en segundo plano para que este no bloquee la terminal:
 
 **nohup python3 1.8_iot_to_mariadb.py > demo_iot_mariadb.log 2>&1 &**
 
-📌 ojo que **nohup** es una forma temporal de ejecutar un script en segundo plano, lo ideal es utilizar un servicio para entornos de produccion.
+📌 ojo que nohup es una forma temporal de ejecutar un script en segundo plano, lo ideal es utilizar un servicio para entornos de produccion.
+
+📌 Como recomendacion de seguridad para entornos de produccion adicionar: Implementar TLS en Mosquitto, Pasar credenciales a variables de entorno, Crear el servicio systemd, Agregar validación automática de payload
 ------------------------------------------------------------------------
 
 ## **1.9 --- Construcción de API para consumo de datos**
 
-Construcción de una API ( con Flask) para exponer datos que se encuentra almacenados en nuestra base de datos.
+En esta etapa se construye una API REST usando Flask que permite exponer los datos almacenados en la base de datos MariaDB/MySQL, facilitando su consumo desde dashboards, aplicaciones web, Power BI u otros sistemas externos.
 
-Instalmos primero **pip install flask** , **pip install flask-cors**, **pip install pymysql**
+Instalación de dependencias 
+**pip install flask**  
+**pip install flask-cors** 
+**pip install pymysql** 
 
-Los principales metodos son:
+La API expone los siguientes endpoints:
 
-GET **/api/health**
-Permite verificar que la API se encuentra operativa. Retorna un mensaje de estado confirmando que el servicio Flask está activo y respondiendo correctamente.
+    GET **/api/health**
+    Permite verificar que la API se encuentra operativa. Retorna un mensaje de estado confirmando que el servicio Flask está activo y respondiendo correctamente.
 
-GET **/api/readings**
-Devuelve el listado de lecturas de sensores almacenadas en la base de datos MariaDB. Admite el parámetro opcional limit para restringir la cantidad de registros retornados (por ejemplo: /api/readings?limit=50).
+    GET **/api/readings**
+    Devuelve el listado de lecturas de sensores almacenadas en la base de datos MariaDB. Admite el parámetro opcional limit para restringir la cantidad de registros retornados (por ejemplo: /api/readings?limit=50).
 
-GET **/api/readings/latest**
-Retorna la última lectura registrada en el sistema, permitiendo acceder rápidamente al dato más reciente generado por los dispositivos IoT.
+    GET **/api/readings/latest**
+    Retorna la última lectura registrada en el sistema, permitiendo acceder rápidamente al dato más reciente generado por los dispositivos IoT.
 
-GET **/api/readings/device/<device_id>**
-Permite consultar todas las lecturas asociadas a un dispositivo específico, identificado por su device_id, facilitando el análisis individual por equipo o sensor.
+    GET **/api/readings/device/<device_id>**
+    Permite consultar todas las lecturas asociadas a un dispositivo específico, identificado por su device_id, facilitando el análisis individual por equipo o sensor.
+
+    GET **/api/readings/range**
+    Permite filtrar las lecturas por un rango de fechas completo, los parametros esperados son: start_date (YYYY-MM-DD) y end_date (YYYY-MM-DD), la url tendra la sigueinte forma: /api/readings/range?start_date=2026-01-15&end_date=2026-01-20
 
 El archivo del api es:
 📄 **Archivo:** `1.9_iot_api_data.py`
 
-Asi mismo agregar a la regla de entrada el puerto **5000**
+⚠️ Asegúrese de habilitar el puerto **5000** en las reglas de firewall o seguridad del servidor.
 
 Realizaremos la prueba corriendo el script y observaremos en el log que se se expone correctamente
 
@@ -198,8 +272,9 @@ Ahora tambien correremos el proceso en segundo plano para que este no bloquee la
 
 **nohup python3 1.9_iot_api_data.py > demo_api_data.log 2>&1 &**
 
-📌 ojo que **nohup** es una forma temporal de ejecutar un script en segundo plano, lo ideal es utilizar un servicio para entornos de produccion.
-📌 Como recomendacion de seguridad para entornos de produccion: Autenticación por API Key, Ocultar credenciales usando variables de entorno,Restringir CORS, Limitación de peticiones,Validación de parámetros
+📌 ojo que nohup es una forma temporal de ejecutar un script en segundo plano, lo ideal es utilizar un servicio para entornos de produccion.
+
+📌 Como recomendacion de seguridad para entornos de produccion adicionar: Autenticación por API Key, Ocultar credenciales usando variables de entorno,Restringir CORS, Limitación de peticiones,Validación de parámetros
 ------------------------------------------------------------------------
 
 ## **1.10 --- Test Python API**
@@ -230,6 +305,7 @@ Una de las Ventajas de tener el api en la nube, es la capacidad de poder conecta
 Deberas reemplazar por la ip y puerto que configuraste en tu servidor:
 
 **================ CONFIGURATION =============**
+
 **const API = "http://0.0.0.0:5000/api";**
 
 
@@ -288,12 +364,15 @@ Formato devuelto:
 
 📄 **Archivo:** `2.2_api_inferencia.py`
 
+⚠️ Asegúrese de habilitar el puerto **5001** en las reglas de firewall o seguridad del servidor.
+
 Ahora tambien correremos el proceso en segundo plano para que este no bloquee la terminal
 
 **nohup python3 2.2_api_inferencia.py > demo_api_infe.log 2>&1 &**
 
-📌 ojo que **nohup** es una forma temporal de ejecutar un script en segundo plano, lo ideal es utilizar un servicio para entornos de produccion.
-📌 Como recomendacion de seguridad para entornos de produccion: Autenticación por API Key, Validación del tamaño de imagen,Limitación de peticiones
+📌 ojo que nohup es una forma temporal de ejecutar un script en segundo plano, lo ideal es utilizar un servicio para entornos de produccion.
+
+📌 Como recomendacion de seguridad para entornos de produccion adicionar: Autenticación por API Key, Validación del tamaño de imagen,Limitación de peticiones
 ------------------------------------------------------------------------
 
 ## **2.3 --- Código test para probar API**
@@ -391,17 +470,45 @@ Huawei IoT Device SDK facilita la conexión a Huawei Cloud IoTDA.
 4.  Visualización
 
 ------------------------------------------------------------------------
+## 👥 Autores
 
-# 📄 Licencia
+- Charlen Maximo Calero Huaman
+- Ronal Noel Vilca Apolin  
+- Darwin Uzuriaga Claudio
 
-Los materiales, laboratorios y ejemplos incluidos en este repositorio
-han sido elaborados como apoyo para actividades académicas y están
-alineados a los lineamientos y objetivos de la **Huawei Teaching
-Competition**, con fines de formación, demostración tecnológica y
-fortalecimiento de competencias en **IoT, Cloud e Inteligencia
-Artificial**.
+------------------------------------------------------------------------
+## 📄 Licencia
 
+© 2026 Charle Calero, Ronal Vilca Apolin, Darwin Usuriaga.
 
-Arduino es una marca registrada de Arduino AG. 
-Este proyecto utiliza placas y herramientas compatibles con Arduino únicamente con fines educativos y demostrativos. 
-El uso del nombre Arduino en este repositorio es solo referencial y no implica afiliación, patrocinio ni aprobación oficial por parte de Arduino.
+Este proyecto está bajo la licencia:
+
+Creative Commons Atribución–CompartirIgual 4.0 Internacional (CC BY-SA 4.0).
+
+Usted es libre de:
+- Compartir — copiar y redistribuir el material en cualquier medio o formato.
+- Adaptar — remezclar, transformar y construir a partir del material.
+
+Bajo los siguientes términos:
+- Atribución — Debe dar crédito adecuado a los autores.
+- Compartir Igual — Las obras derivadas deben distribuirse bajo la misma licencia.
+
+Más información:
+https://creativecommons.org/licenses/by-sa/4.0/
+
+------------------------------------------------------------------------
+
+Arduino es una marca registrada de Arduino AG.  
+ESP32 es una marca registrada de Espressif Systems.  
+Huawei es una marca registrada de Huawei Technologies Co., Ltd.  
+Microsoft Azure es una marca registrada de Microsoft Corporation.  
+Raspberry Pi es una marca registrada de Raspberry Pi Ltd.  
+openEuler es una marca registrada de Open Atom Foundation / Huawei.  
+MySQL es una marca registrada de Oracle Corporation.  
+Mosquitto es una marca registrada de la Eclipse Foundation.
+ChatGPT es una marca registrada de OpenAI.
+
+Este proyecto utiliza placas, plataformas, sistemas operativos, servicios en la nube y herramientas compatibles únicamente con fines educativos, académicos y demostrativos.
+
+El uso de los nombres comerciales, marcas y logotipos en este repositorio es únicamente referencial y no implica afiliación, patrocinio, certificación ni aprobación oficial por parte de los respectivos propietarios.
+
