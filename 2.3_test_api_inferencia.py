@@ -9,12 +9,12 @@ import os
 
 # -----------------------------
 # Configuración
+# Deberas reemplazar por la ip y puerto que configuraste en tu servidor
 # -----------------------------
 API_URL = "http://20.40.210.148:5001/infer"
 
 # === ELIGE UNA ===
-#url_o_ruta = "/home/calero/Descargas/istockphoto-1481370371-1024x1024.jpg"
-#url_o_ruta = "/home/calero/Descargas/chef-apuntando-la-lateral-sobre-fondo-blanco.jpg"
+
 url_o_ruta = "https://img.freepik.com/fotos-premium/trabajador-ropa-especial-fabrica-casco-contexto-produccion_564714-11567.jpg"
 
 OUTPUT_IMAGE = "resultado.png"

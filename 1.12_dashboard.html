@@ -8,6 +8,99 @@
 
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+
+// ================ CONFIGURATION =============
+
+const API = "http://20.40.210.148:5000/api";
+
+let chart;
+
+// ================== TABS ==================
+document.querySelectorAll(".tabs li").forEach(tab => {
+  tab.addEventListener("click", () => {
+    document.querySelectorAll(".tabs li").forEach(t => t.classList.remove("is-active"));
+    tab.classList.add("is-active");
+    document.querySelectorAll(".tab-content").forEach(c => c.style.display = "none");
+    document.getElementById(tab.dataset.tab).style.display = "block";
+  });
+});
+
+// ================== LATEST READING ==================
+async function loadLatest() {
+  const res = await fetch(`${API}/readings/latest`);
+  const data = await res.json();
+
+  const container = document.getElementById("latestCards");
+  container.innerHTML = "";
+
+  Object.entries(data).forEach(([key, value]) => {
+    if (key === "id" || key === "device_id") return;
+
+    container.innerHTML += `
+      <div class="column is-12-mobile is-6-tablet is-3-desktop">
+        <div class="card">
+          <div class="card-content has-text-centered">
+            <p class="heading">${key}</p>
+            <p class="title is-5">${value}</p>
+          </div>
+        </div>
+      </div>
+    `;
+  });
+}
+
+// ================== RANGE DATA ==================
+async function loadRangeData() {
+  const start = document.getElementById("startDate").value;
+  const end = document.getElementById("endDate").value;
+
+  if (!start || !end) {
+    alert("Please select both dates");
+    return;
+  }
+
+  const res = await fetch(
+    `${API}/readings/range?start_date=${start}&end_date=${end}`
+  );
+  const data = await res.json();
+
+  renderChart(data);
+}
+
+// ================== CHART ==================
+function renderChart(data) {
+  const variable = document.getElementById("variableSelect").value;
+
+  if (chart) chart.destroy();
+
+  chart = new Chart(document.getElementById("chart"), {
+    type: "line",
+    data: {
+      labels: data.map(r => r.timestamp),
+      datasets: [{
+        label: variable,
+        data: data.map(r => r[variable]),
+        borderWidth: 2,
+        tension: 0.3,
+        fill: false
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      scales: {
+        x: {
+          ticks: { maxRotation: 45 }
+        }
+      }
+    }
+  });
+}
+
+// ================== INIT ==================
+loadLatest();
+</script>
 
 <style>
 /* ---------- UI Ajustes ---------- */
@@ -122,95 +215,7 @@ canvas {
 </div>
 </section>
 
-<script>
-const API = "http://20.40.210.148:5000/api";
-let chart;
 
-// ================== TABS ==================
-document.querySelectorAll(".tabs li").forEach(tab => {
-  tab.addEventListener("click", () => {
-    document.querySelectorAll(".tabs li").forEach(t => t.classList.remove("is-active"));
-    tab.classList.add("is-active");
-    document.querySelectorAll(".tab-content").forEach(c => c.style.display = "none");
-    document.getElementById(tab.dataset.tab).style.display = "block";
-  });
-});
-
-// ================== LATEST READING ==================
-async function loadLatest() {
-  const res = await fetch(`${API}/readings/latest`);
-  const data = await res.json();
-
-  const container = document.getElementById("latestCards");
-  container.innerHTML = "";
-
-  Object.entries(data).forEach(([key, value]) => {
-    if (key === "id" || key === "device_id") return;
-
-    container.innerHTML += `
-      <div class="column is-12-mobile is-6-tablet is-3-desktop">
-        <div class="card">
-          <div class="card-content has-text-centered">
-            <p class="heading">${key}</p>
-            <p class="title is-5">${value}</p>
-          </div>
-        </div>
-      </div>
-    `;
-  });
-}
-
-// ================== RANGE DATA ==================
-async function loadRangeData() {
-  const start = document.getElementById("startDate").value;
-  const end = document.getElementById("endDate").value;
-
-  if (!start || !end) {
-    alert("Please select both dates");
-    return;
-  }
-
-  const res = await fetch(
-    `${API}/readings/range?start_date=${start}&end_date=${end}`
-  );
-  const data = await res.json();
-
-  renderChart(data);
-}
-
-// ================== CHART ==================
-function renderChart(data) {
-  const variable = document.getElementById("variableSelect").value;
-
-  if (chart) chart.destroy();
-
-  chart = new Chart(document.getElementById("chart"), {
-    type: "line",
-    data: {
-      labels: data.map(r => r.timestamp),
-      datasets: [{
-        label: variable,
-        data: data.map(r => r[variable]),
-        borderWidth: 2,
-        tension: 0.3,
-        fill: false
-      }]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      scales: {
-        x: {
-          ticks: { maxRotation: 45 }
-        }
-      }
-    }
-  });
-}
-
-// ================== INIT ==================
-loadLatest();
-</script>
 
 </body>
 </html>

@@ -199,6 +199,7 @@ Ahora tambien correremos el proceso en segundo plano para que este no bloquee la
 **nohup python3 1.9_iot_api_data.py > demo_api_data.log 2>&1 &**
 
 📌 ojo que **nohup** es una forma temporal de ejecutar un script en segundo plano, lo ideal es utilizar un servicio para entornos de produccion.
+📌 Como recomendacion de seguridad para entornos de produccion: Autenticación por API Key, Ocultar credenciales usando variables de entorno,Restringir CORS, Limitación de peticiones,Validación de parámetros
 ------------------------------------------------------------------------
 
 ## **1.10 --- Test Python API**
@@ -207,6 +208,9 @@ Ahora tambien correremos el proceso en segundo plano para que este no bloquee la
 
 Script que consume la API y valida su funcionamiento.
 
+Tendremos que ingresar la IP del servidor 
+
+**BASE_URL = "http://0.0.0.0:5000"**
 ------------------------------------------------------------------------
 
 ## **1.11 --- Conexión a Power BI**
@@ -221,7 +225,13 @@ Web/API**\
 
 ## **1.12 --- Crear Dashboards personalizados**
 
-Una de las Ventajas de tener el api en la nube, es la capacidad de poder conectarnos con aplicaciones web, moviles o de escritorio, creamos un ejemplo para que puedas ver el potencial y puedas tu mismo generar dashboards personalizados aplicando los cursos de Desarrollo Web
+Una de las Ventajas de tener el api en la nube, es la capacidad de poder conectarnos con aplicaciones web, moviles o de escritorio, creamos un ejemplo para que puedas ver el potencial y puedas tu mismo generar dashboards personalizados aplicando los cursos de Desarrollo Web.
+
+Deberas reemplazar por la ip y puerto que configuraste en tu servidor:
+
+**================ CONFIGURATION =============**
+**const API = "http://0.0.0.0:5000/api";**
+
 
 📄 **Archivo:** `1.12_dashboard.html`
 
@@ -251,20 +261,50 @@ Se emplea para validar el modelo, comprender su funcionamiento y evaluar resulta
 
 ## **2.2 --- Crear API Flask Python**
 
+En este archivo se construye una **API REST con Flask** que expone el modelo de inferencia.  
+La imagen se envía codificada en Base64 mediante una petición HTTP POST y el sistema devuelve los porcentajes de confianza y opcionalmente una imagen marcada con los resultados.
+
+El metodo principal:
+**POST /infer**
+
+Formato de peticion en Json de entrada:
+**{**
+  **"id_equipo": "CAM01",**
+  **"image_base64": "iVBORw0KGgoAAAANSUhEUgAA...",**
+  **"retorno_imagen": "SI"**
+**}**
+
+Formato devuelto:
+**{**
+  **"id_equipo": "CAM01",**
+  **"inference_time_seconds": 0.4231,**
+  **"results": {**
+    **"helmet": 87.45,**
+    **"vest": 62.10**
+  **},**
+  **"imagen_base64": "iVBORw0KGgoAAAANSUhEUgAA..."**
+**}**
+
+
 📄 **Archivo:** `2.2_api_inferencia.py`
 
-En este archivo se construye una **API REST con Flask** que expone el modelo de inferencia.  
-La API recibe imágenes desde clientes externos y retorna los resultados del análisis, permitiendo desacoplar el modelo del dispositivo que captura la imagen.
+Ahora tambien correremos el proceso en segundo plano para que este no bloquee la terminal
 
+**nohup python3 2.2_api_inferencia.py > demo_api_infe.log 2>&1 &**
+
+📌 ojo que **nohup** es una forma temporal de ejecutar un script en segundo plano, lo ideal es utilizar un servicio para entornos de produccion.
+📌 Como recomendacion de seguridad para entornos de produccion: Autenticación por API Key, Validación del tamaño de imagen,Limitación de peticiones
 ------------------------------------------------------------------------
 
 ## **2.3 --- Código test para probar API**
 
-📄 **Archivo:** `2.3_test_api_inferencia.py`
-
 Este script permite **validar el funcionamiento de la API**, enviando una imagen de prueba y verificando la respuesta del modelo.  
 Es fundamental para comprobar conectividad, formato de datos y estabilidad del servicio.
 
+Deberas reemplazar por la ip y puerto que configuraste en tu servidor:
+**API_URL = "http://0.0.0.0:5001/infer"**
+
+📄 **Archivo:** `2.3_test_api_inferencia.py`
 ------------------------------------------------------------------------
 
 ## **2.4 --- Código ESP32-CAM**
@@ -276,37 +316,53 @@ Permite evaluar escenarios de **edge computing e IoT visual**, donde un disposit
   <img src="1.1 img_esp32-cam.png" width="500">
 </p>
 
+Solo sera necesario configurar el WIFI y la URL del servidor
+
+================= WIFI =================
+**const char* ssid = "REDWIFI";**
+**const char* password = "clave";**
+
+================= API ==================
+**const char* API_URL = "http://0.0.0.0:5001/infer";**
+
+Realizaremos la carga en el dispositivo, seleccionaremos tipo de tarjeta AI Thinker ESP32CAM
+
+📄 **Archivo:** `2.4_esp32-cam_api_infe.ino`
 ------------------------------------------------------------------------
-
-## **2.5 --- PC con OpenEuler**
-
-📄 **Archivo:** `2.5_inferencia_cam_local.py`
-
-Este código captura imágenes desde una **cámara conectada a un PC con OpenEuler** y las envía a la API para su análisis.  
-Se utiliza para pruebas de escritorio, validación de rendimiento y depuración del sistema.
-
-------------------------------------------------------------------------
-
-## **2.6 --- Raspberry con OpenEuler**
-
-📄 **Archivo:** `2.6_inferencia_raspberry.py`
-
-Versión adaptada para ejecutarse en una **Raspberry Pi con OpenEuler**, permitiendo realizar inferencias remotas desde un dispositivo de bajo consumo.  
-Simula escenarios reales de despliegue en campo.
 
 <p align="center">
   <img src="1.1 img_raspberry pi4.png" width="500">
 </p>
 
+## **2.5 --- PC/Raspberry con OpenEuler por API**
+
+Este código captura imágenes desde una **cámara conectada a un PC con OpenEuler** y las envía a la API para su análisis.  
+
+Nos dirigiremos a la opcion de configuracion y colocaremos la IP del servidor de la nube y tambie el ID  de la camara este puede variar de acuerdo al equipo (0,1,2,...)
+-----------------------------
+Configuración
+-----------------------------
+**API_URL = "http://0.0.0.0:5001/infer"**
+**CAMERA_ID = 1**
+
+📄 **Archivo:** `2.5_inferencia_api_raspberry.py`
+
+Tambien se desarrollo una app web que se comunica al API, es necesario cambiar el IP y PUERTO del servidor 
+
+**const API_URL = "http://0.0.0.0:5001/infer";**
+
+📄 **Archivo:** `2.5_inferencia_web.html`
 ------------------------------------------------------------------------
 
-## **2.7 --- Inferencia local en Raspberry**
+## **2.6 --- PC/Raspberry con OpenEuler en Local**
 
-*(Pendiente de implementación)*
 
 Este módulo permitirá ejecutar el modelo de **Inteligencia Artificial directamente en la Raspberry**, sin depender de una API externa.  
 Este enfoque reduce latencia, dependencia de red y mejora la autonomía del sistema.
 
+📄 **Archivo:** `2.6_inferencia_cam_local_raspberry.py`
+
+Este programa permite que una computadora o una Raspberry Pi utilice una cámara para observar el entorno y analizar automáticamente si una persona cumple normas básicas de seguridad, como el uso de casco y chaleco. El sistema captura una imagen cuando el usuario lo solicita, la analiza con un modelo de inteligencia artificial y calcula porcentajes de probabilidad de cumplimiento. Los resultados se muestran directamente sobre la imagen y se guardan como evidencia. Además, el programa se adapta al tipo de dispositivo y forma de visualización disponible, demostrando cómo la inteligencia artificial puede aplicarse de manera práctica en escenarios reales de supervisión y seguridad.
 
 ------------------------------------------------------------------------
 
