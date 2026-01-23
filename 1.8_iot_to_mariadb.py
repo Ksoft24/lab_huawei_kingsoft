@@ -4,7 +4,7 @@ import mysql.connector
 import paho.mqtt.client as mqtt
 
 # ================= MQTT CONFIG =================
-MQTT_BROKER = "20.40.210.148"
+MQTT_BROKER = "20.83.43.2"
 MQTT_PORT = 1883
 MQTT_TOPIC = "lab/sensors/#"
 

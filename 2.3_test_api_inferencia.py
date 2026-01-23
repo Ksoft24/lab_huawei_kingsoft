@@ -11,7 +11,7 @@ import os
 # Configuración
 # Deberas reemplazar por la ip y puerto que configuraste en tu servidor
 # -----------------------------
-API_URL = "http://20.40.210.148:5001/infer"
+API_URL = "http://20.83.43.2:5001/infer"
 
 # === ELIGE UNA ===
 

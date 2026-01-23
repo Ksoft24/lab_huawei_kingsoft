@@ -1,3 +1,6 @@
+
+// ================= Cloud IoT Integration Laboratory   =================
+
 #include <Wire.h>
 #include <DHT.h>
 #include <BH1750.h>
