@@ -1,6 +1,6 @@
 import requests
 
-BASE_URL = "http://20.83.43.2:5000"
+BASE_URL = "http://159.138.237.255:5000"
 
 print("🔍 Health check")
 print(requests.get(f"{BASE_URL}/api/health").json())

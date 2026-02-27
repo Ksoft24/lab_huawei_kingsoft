@@ -15,7 +15,7 @@ import platform
 
 
 # -----------------------------
-# Detección de entorno
+# Environment detection
 # -----------------------------
 def is_raspberry():
     try:
@@ -27,31 +27,31 @@ def is_raspberry():
 HAS_GUI = bool(os.environ.get("DISPLAY"))
 IS_RASPBERRY = is_raspberry()
 
-print("🖥 GUI disponible:", HAS_GUI)
-print("🍓 Raspberry detectado:", IS_RASPBERRY)
+print("🖥 GUI available:", HAS_GUI)
+print("🍓 Raspberry detected:", IS_RASPBERRY)
 
 # -----------------------------
-# Configuración CLIP
+# CLIP configuration
 # -----------------------------
 device = "cuda" if torch.cuda.is_available() else "cpu"
 model, preprocess = clip.load("ViT-B/32", device=device)
 model.eval()
 
 # -----------------------------
-# Carpeta de imágenes
+# Image folder
 # -----------------------------
 BASE_DIR = os.path.expanduser("~/laboratorio_kingsoft")
 os.makedirs(BASE_DIR, exist_ok=True)
 
-print("📁 Imágenes se guardarán en:", BASE_DIR)
+print("📁 Images will be saved in:", BASE_DIR)
 
 # -----------------------------
-# Cámara
+# Camera
 # -----------------------------
-CAMERA_ID = 0   # cambia si es necesario
+CAMERA_ID = 0   # change if necessary
 
 # -----------------------------
-# Clases PPE
+# PPE classes
 # -----------------------------
 ppe_items = {
     "helmet": (
@@ -60,7 +60,7 @@ ppe_items = {
     ),
     "vest": (
         "construction worker wearing an orange safety vest",
-        "person without an safety vest"
+        "person without a safety vest"
     )
 }
 
@@ -68,7 +68,7 @@ ppe_items = {
 # Utils
 # -----------------------------
 def get_key():
-    """Lee una tecla sin enter (solo Linux/Unix)"""
+    """Reads a single key without pressing Enter (Linux/Unix only)"""
     fd = sys.stdin.fileno()
     old_settings = termios.tcgetattr(fd)
     try:
@@ -81,19 +81,19 @@ def get_key():
 def capture_frame():
     cap = cv2.VideoCapture(CAMERA_ID)
     if not cap.isOpened():
-        print("❌ No se pudo abrir la cámara")
+        print("❌ Unable to open camera")
         return None
     ret, frame = cap.read()
     cap.release()
     if not ret:
-        print("❌ Error capturando frame")
+        print("❌ Error capturing frame")
         return None
 
     img = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
     return Image.fromarray(img)
 
 def infer_clip(image):
-    """Inferencia local CLIP"""
+    """Local CLIP inference"""
     image_resized = image.resize((1024, 640))
     image_input = preprocess(image_resized).unsqueeze(0).to(device)
 
@@ -154,32 +154,32 @@ def save_image(image):
 
 def show_image(path):
     """
-    Decide automáticamente cómo mostrar la imagen
+    Automatically decides how to display the image
     """
-    # Caso 1: hay entorno gráfico
+    # Case 1: graphical environment available
     if HAS_GUI and not IS_RASPBERRY:
-        print("🖥 Mostrando imagen con ventana gráfica")
+        print("🖥 Displaying image using GUI window")
         img = cv2.imread(path)
-        cv2.imshow("Inferencia CLIP", img)
+        cv2.imshow("CLIP Inference", img)
         cv2.waitKey(2000)
         cv2.destroyAllWindows()
 
-    # Caso 2: Raspberry / sin GUI → ASCII en Python
+    # Case 2: Raspberry / no GUI → ASCII in terminal
     else:
-        print("📟 Mostrando imagen en modo ASCII (Python)")
+        print("📟 Displaying image in ASCII mode (Python)")
         try:
             show_ascii_image(path, width=80)
         except Exception as e:
-            print("⚠️ Error mostrando ASCII:", e)
+            print("⚠️ ASCII display error:", e)
 
 
 # -----------------------------
-# Visualización ASCII (sin dependencias externas)
+# ASCII visualization (no external dependencies)
 # -----------------------------
 def show_ascii_image(image_path, width=80):
     chars = np.asarray(list(" .:-=+*#%@"))
 
-    img = Image.open(image_path).convert("L")  # escala de grises
+    img = Image.open(image_path).convert("L")  # grayscale
     w, h = img.size
     aspect_ratio = h / w
     new_height = int(aspect_ratio * width * 0.55)
@@ -195,11 +195,11 @@ def show_ascii_image(image_path, width=80):
         print("".join(row))
 
 # -----------------------------
-# Loop principal
+# Main loop
 # -----------------------------
 def main():
-    print("\n🎥 Programa de inferencia CLIP iniciado")
-    print("H = Inferir | Q = Salir\n")
+    print("\n🎥 CLIP inference program started")
+    print("H = Infer | Q = Exit\n")
 
     while True:
         key = get_key()
@@ -209,21 +209,21 @@ def main():
             if frame is None:
                 continue
 
-            print("\n🧠 Inferencia en curso...")
+            print("\n🧠 Running inference...")
             results, t_inf = infer_clip(frame)
 
-            print(f"⏱ Tiempo: {t_inf}s")
+            print(f"⏱ Inference time: {t_inf}s")
             for k, v in results.items():
                 print(f"  {k.upper()}: {v:.1f}%")
 
             frame_marked = draw_results(frame.copy(), results)
             path = save_image(frame_marked)
-            print(f"🖼 Imagen guardada en: {path}")
+            print(f"🖼 Image saved at: {path}")
 
             show_image(path)
 
         elif key == "q":
-            print("🔚 Saliendo del programa...")
+            print("🔚 Exiting program...")
             break
 
 if __name__ == "__main__":

@@ -5,7 +5,7 @@ import paho.mqtt.client as mqtt
 
 # ================ MQTT CONFIG =================
 # PUBLIC SERVER IP
-BROKER_IP = "20.83.43.2"
+BROKER_IP = "159.138.237.255"
 BROKER_PORT = 1883
 TOPIC = "lab/sensors/device01"
 
@@ -53,6 +53,6 @@ while True:
 
     payload = generate_payload(fall=simulate_fall)
     client.publish(TOPIC, json.dumps(payload), qos=1)
-
+    client.loop_start() 
     print("📤 Sent:", payload)
     time.sleep(3)
