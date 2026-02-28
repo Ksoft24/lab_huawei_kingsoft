@@ -8,7 +8,7 @@ const char* ssid = "KINGSOFT";
 const char* password = "wendy12345";
 
 // ================= API ==================
-const char* API_URL = "http://20.83.43.2:5001/infer";
+const char* API_URL = "http://159.138.237.255:5001/infer";
 
 // ================= CAMARA (AI THINKER) ==
 #define PWDN_GPIO_NUM     32
